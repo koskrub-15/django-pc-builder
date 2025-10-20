@@ -1,0 +1,276 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="6c162d54-98e7-4ff4-b7a5-ac66a2c1cbce" name="Changes" comment="Add initial project structure and configuration files">
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="CSS File" />
+        <option value="Python Script" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="test_2" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;koskrub-15&quot;
+  }
+}</component>
+  <component name="GitToolBoxStore">
+    <option name="recentBranches">
+      <RecentBranches>
+        <option name="branchesForRepo">
+          <list>
+            <RecentBranchesForRepo>
+              <option name="branches">
+                <list>
+                  <RecentBranch>
+                    <option name="branchName" value="main" />
+                    <option name="lastUsedInstant" value="1760986815" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="test_2" />
+                    <option name="lastUsedInstant" value="1749567414" />
+                  </RecentBranch>
+                  <RecentBranch>
+                    <option name="branchName" value="test" />
+                    <option name="lastUsedInstant" value="1748629437" />
+                  </RecentBranch>
+                </list>
+              </option>
+              <option name="repositoryRootUrl" value="file://$PROJECT_DIR$" />
+            </RecentBranchesForRepo>
+          </list>
+        </option>
+      </RecentBranches>
+    </option>
+  </component>
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "git@github.com:koskrub-15/project_builder__bevz_konstantin__main.git",
+    "accountId": "17ff4a00-78cf-4b2f-bff4-8d99798ce598"
+  }
+}]]></component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 3
+}</component>
+  <component name="ProjectId" id="2xSVyqQwBn7CfLjTyyS3yGr2GRX" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "DefaultHtmlFileTemplate": "HTML File",
+    "ModuleVcsDetector.initialDetectionPerformed": "true",
+    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
+    "RunOnceActivity.git.unshallow": "true",
+    "SHELLCHECK.PATH": "C:\\Users\\kosty\\AppData\\Roaming\\JetBrains\\PyCharm2025.1\\plugins\\Shell Script\\linux\\amd64\\shellcheck",
+    "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
+    "git-widget-placeholder": "main",
+    "junie.onboarding.icon.badge.shown": "true",
+    "last_opened_file_path": "//wsl.localhost/Ubuntu/home/koskrub15/projects/builder/project_builder__bevz_konstantin__main",
+    "list.type.of.created.stylesheet": "CSS",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "settings.editor.selected.configurable": "preferences.pluginManager",
+    "to.speed.mode.migration.done": "true",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "postgresql"
+    ]
+  }
+}]]></component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\builder\project_builder__bevz_konstantin__main" />
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main\apps\static\app\img" />
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main\apps\static\app" />
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main\apps" />
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main\staticfiles" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main\apps\static\app\img" />
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main" />
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main\apps\blog\models" />
+      <recent name="\\wsl.localhost\Ubuntu\home\koskrub15\projects\project__bevz_konstantin__main\apps\blog\posts" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
+        <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="6c162d54-98e7-4ff4-b7a5-ac66a2c1cbce" name="Changes" comment="" />
+      <created>1747931718561</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1747931718561</updated>
+      <workItem from="1747931719652" duration="1000" />
+      <workItem from="1748017188905" duration="2809000" />
+      <workItem from="1748108575765" duration="8810000" />
+      <workItem from="1748117456010" duration="16895000" />
+      <workItem from="1748197096175" duration="308000" />
+      <workItem from="1748453391483" duration="489000" />
+      <workItem from="1748454380985" duration="17000" />
+      <workItem from="1748454503581" duration="106000" />
+      <workItem from="1748522418241" duration="6884000" />
+      <workItem from="1748607066884" duration="14247000" />
+      <workItem from="1748630266355" duration="21000" />
+      <workItem from="1749139263873" duration="693000" />
+      <workItem from="1749139990041" duration="6230000" />
+      <workItem from="1749218438258" duration="1383000" />
+      <workItem from="1749219879630" duration="430000" />
+      <workItem from="1749220322744" duration="2860000" />
+      <workItem from="1749223264495" duration="11988000" />
+      <workItem from="1749297428731" duration="27710000" />
+      <workItem from="1749374767883" duration="6461000" />
+      <workItem from="1749462386935" duration="8475000" />
+      <workItem from="1749472303739" duration="20668000" />
+      <workItem from="1749564745197" duration="1368000" />
+      <workItem from="1749566503553" duration="2946000" />
+      <workItem from="1754059526826" duration="305000" />
+      <workItem from="1754320193774" duration="4001000" />
+      <workItem from="1754404212852" duration="22000" />
+      <workItem from="1755789965922" duration="706000" />
+      <workItem from="1756558180279" duration="829000" />
+      <workItem from="1757687272037" duration="930000" />
+      <workItem from="1759491905452" duration="47000" />
+      <workItem from="1759492715086" duration="1975000" />
+      <workItem from="1759688936021" duration="19000" />
+      <workItem from="1760986715398" duration="630000" />
+    </task>
+    <task id="LOCAL-00001" summary="first version of app, added simple blog">
+      <option name="closed" value="true" />
+      <created>1748109483013</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1748109483013</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Add initial Django project structure and base applications&#10;&#10;This commit sets up the initial structure for a Django project. It includes core configurations, initial apps like blog, account, store, and associated resources (models, views, templates). Additional changes include static files setup, URL routing, and Justfile scripts for development automation.">
+      <option name="closed" value="true" />
+      <created>1748629462193</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1748629462193</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Add initial Django project structure and base applications&#10;&#10;This commit sets up the initial structure for a Django project. It includes core configurations, initial apps like blog, account, store, and associated resources (models, views, templates). Additional changes include static files setup, URL routing, and Justfile scripts for development automation.">
+      <option name="closed" value="true" />
+      <created>1749224801789</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1749224801789</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Commit description&#10;&#10;Improved PC builder:&#10;&#10;Now displays a full list of components in the right column&#10;&#10;You can edit components and builds directly&#10;&#10;Shows the total price of the build dynamically&#10;&#10;Create and update builds seamlessly&#10;&#10;Blog section updated:&#10;&#10;Enhanced design and layout&#10;&#10;Added the ability to create and edit categories for better content organization&#10;&#10;Introduced &quot;About Me&quot; page:&#10;&#10;Includes personal information&#10;&#10;Contact links with clean SVG icons for a professional touch">
+      <option name="closed" value="true" />
+      <created>1749381328133</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1749381328133</updated>
+    </task>
+    <task id="LOCAL-00005" summary="Enhance email notifications and add markup feature to order creation">
+      <option name="closed" value="true" />
+      <created>1749481584283</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1749481584283</updated>
+    </task>
+    <task id="LOCAL-00006" summary="Refactor Docker setup and enhance ASGI/WSGI configurations; update email settings and static file handling">
+      <option name="closed" value="true" />
+      <created>1749490666773</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1749490666773</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Refactor forms and templates for improved user experience and validation; update email configuration placeholders and add dark theme styles.">
+      <option name="closed" value="true" />
+      <created>1749565316531</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1749565316532</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Add initial project structure and configuration files">
+      <option name="closed" value="true" />
+      <created>1760987087415</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1760987087415</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="true" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <MESSAGE value="updated .md file about future project" />
+    <MESSAGE value="first version of app, added simple blog" />
+    <MESSAGE value="Refactor &quot;accounts&quot; app and create &quot;profile&quot; app.&#10;&#10;Moved user-related functionalities to a new &quot;profile&quot; app for better modularity and maintainability. Reorganized templates, views, URLs, and settings to reflect these changes. Minor formatting improvements and cleanup performed across templates and files." />
+    <MESSAGE value="Add initial Django project structure and base applications&#10;&#10;This commit sets up the initial structure for a Django project. It includes core configurations, initial apps like blog, account, store, and associated resources (models, views, templates). Additional changes include static files setup, URL routing, and Justfile scripts for development automation." />
+    <MESSAGE value="Added &quot;About me&quot; page, now admin and customers becoming messages on email, now page &quot;builder/builds&quot; is looking better and has more functions" />
+    <MESSAGE value="Commit description&#10;&#10;Improved PC builder:&#10;&#10;Now displays a full list of components in the right column&#10;&#10;You can edit components and builds directly&#10;&#10;Shows the total price of the build dynamically&#10;&#10;Create and update builds seamlessly&#10;&#10;Blog section updated:&#10;&#10;Enhanced design and layout&#10;&#10;Added the ability to create and edit categories for better content organization&#10;&#10;Introduced &quot;About Me&quot; page:&#10;&#10;Includes personal information&#10;&#10;Contact links with clean SVG icons for a professional touch" />
+    <MESSAGE value="Enhance email notifications and add markup feature to order creation" />
+    <MESSAGE value="Refactor Docker setup and enhance ASGI/WSGI configurations; update email settings and static file handling" />
+    <MESSAGE value="Refactor forms and templates for improved user experience and validation; update email configuration placeholders and add dark theme styles." />
+    <MESSAGE value="Add initial project structure and configuration files" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add initial project structure and configuration files" />
+  </component>
+</project>
