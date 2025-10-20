@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>{{ subject }}</title>
+        <meta name="description"
+              content="Order message notification for PC build service.">
+        <meta name="keywords" content="order,message,notification,pc build,service">
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+              rel="stylesheet">
+        <style>
+            .max-width-500 {
+                max-width: 500px;
+            }
+        </style>
+    </head>
+    <body class="bg-light">
+        <div class="container py-5">
+            <div class="card shadow-sm mx-auto max-width-500">
+                <div class="card-body">
+                    <h2 class="card-title text-primary mb-4">{{ subject }}</h2>
+                    <p class="mb-2">
+                        <strong>Hello,</strong> {{ username }}
+                    </p>
+                    <p class="mb-2">
+                        <strong>{{ message }}</strong>
+                    </p>
+                    <ul class="list-group list-group-flush mb-3">
+                        <li class="list-group-item">
+                            <strong>Build:</strong> {{ order.build.name }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Address:</strong> {{ order.address }}
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Order number:</strong> {{ order.id }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,280 @@
+{% extends "_helpers/_base.html" %}
+{% load static %}
+{% block title %}
+    Home
+{% endblock title %}
+{% block content %}
+    <main class="homepage">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container py-5">
+                <header class="text-center mb-4">
+                    <h1 class="display-4 fw-bold">Welcome to my site!</h1>
+                </header>
+                <!-- Hero Carousel -->
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body p-0">
+                                <div id="heroCarousel"
+                                     class="carousel slide carousel-fade"
+                                     data-bs-ride="carousel"
+                                     data-bs-interval="2500">
+                                    <!-- Indicators -->
+                                    <div class="carousel-indicators">
+                                        {% for i in "123" %}
+                                            <button type="button"
+                                                    data-bs-target="#heroCarousel"
+                                                    data-bs-slide-to="{{ forloop.counter0 }}"
+                                                    {% if forloop.first %}class="active" aria-current="true"{% endif %}
+                                                    aria-label="Slide {{ forloop.counter }}"></button>
+                                        {% endfor %}
+                                    </div>
+                                    <!-- Slides -->
+                                    <div class="carousel-inner rounded-3 overflow-hidden">
+                                        <div class="carousel-item active">
+                                            <div class="ratio ratio-16x9">
+                                                <img src="{% static 'app/img/carousel_3.jpg' %}"
+                                                     class="carousel-image"
+                                                     alt="PC Assembly Showcase"
+                                                     loading="eager">
+                                                <div class="carousel-caption custom-caption d-none d-md-block">
+                                                    <h5 class="display-6">Custom PC Assembly</h5>
+                                                    <p class="lead">Expertly crafted systems tailored to your needs</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="ratio ratio-16x9">
+                                                <img src="{% static 'app/img/carousel_2.webp' %}"
+                                                     class="carousel-image"
+                                                     alt="Custom PC Components"
+                                                     loading="lazy">
+                                                <div class="carousel-caption custom-caption d-none d-md-block">
+                                                    <h5 class="display-6">Quality Components</h5>
+                                                    <p class="lead">Only the best parts for your build</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="carousel-item">
+                                            <div class="ratio ratio-16x9">
+                                                <img src="{% static 'app/img/carouseL_1.webp' %}"
+                                                     class="carousel-image"
+                                                     alt="Professional PC Build"
+                                                     loading="lazy">
+                                                <div class="carousel-caption custom-caption d-none d-md-block">
+                                                    <h5 class="display-6">Professional Assembly</h5>
+                                                    <p class="lead">Built with precision and care</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <!-- Controls -->
+                                    <button class="carousel-control-prev"
+                                            type="button"
+                                            data-bs-target="#heroCarousel"
+                                            data-bs-slide="prev">
+                                        <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Previous</span>
+                                    </button>
+                                    <button class="carousel-control-next"
+                                            type="button"
+                                            data-bs-target="#heroCarousel"
+                                            data-bs-slide="next">
+                                        <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                        <span class="visually-hidden">Next</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Services Section -->
+        <section class="services-section py-5 bg-light">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h2 class="card-title mb-4">PC Assembly Services</h2>
+                                <div class="service-highlight">
+                                    <a href="{% url 'store:index' %}" class="text-decoration-none">
+                                        <div class="card text-bg-dark position-relative overflow-hidden rounded-3">
+                                            <img src="{% static 'app/img/PC For Different.webp' %}"
+                                                 class="card-img"
+                                                 alt="Custom PC builds for different purposes"
+                                                 loading="lazy">
+                                            <div class="card-img-overlay d-flex flex-column justify-content-center text-center">
+                                                <h3 class="card-title mb-3 text-white">PC for Different Purposes</h3>
+                                                <p class="card-text">
+                                                    <small class="text-light">PC for gamers, PC for work</small>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Features Section -->
+        <section class="features-section py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <h2 class="mb-5">Why Choose Our Services</h2>
+                        <!-- Feature Cards Grid -->
+                        <div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+                            <div class="col">
+                                <article class="card h-100 shadow-sm">
+                                    <img src="{% static 'app/img/Individual Selection of Components.webp' %}"
+                                         class="card-img-top"
+                                         alt="Individual component selection"
+                                         loading="lazy">
+                                    <div class="card-body d-flex flex-column">
+                                        <h3 class="card-title h5">Individual Selection of Components</h3>
+                                        <div class="card-text">
+                                            <p>
+                                                We offer a tailored approach for building your system. Every component is carefully selected based on your specific needs and preferences — whether you're a gamer, a content creator, or a professional in need of reliable performance.
+                                            </p>
+                                            <div class="mt-3">
+                                                <strong>Why it matters:</strong>
+                                                <ul class="list-unstyled mt-2">
+                                                    <li>— Optimized performance for your specific use case</li>
+                                                    <li>— Compatibility and stability guaranteed</li>
+                                                    <li>— Expert advice every step of the way</li>
+                                                </ul>
+                                            </div>
+                                            <p class="mt-3">
+                                                <strong>Your system isn't just another machine — it's built for you.</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                            <div class="col">
+                                <article class="card h-100 shadow-sm">
+                                    <img src="{% static 'app/img/Focus on Quality.webp' %}"
+                                         class="card-img-top"
+                                         alt="Quality focused PC assembly"
+                                         loading="lazy">
+                                    <div class="card-body d-flex flex-column">
+                                        <h3 class="card-title h5">Focus on Quality</h3>
+                                        <div class="card-text">
+                                            <p>
+                                                Quality is at the core of everything we do. From the choice of components to the assembly process, every step is handled with precision and care. We only work with trusted brands and verified suppliers.
+                                            </p>
+                                            <div class="mt-3">
+                                                <strong>Our commitment includes:</strong>
+                                                <ul class="list-unstyled mt-2">
+                                                    <li>— Premium hardware with long-term reliability</li>
+                                                    <li>— Professional assembly and stress testing</li>
+                                                    <li>— Clean cable management and thermal optimization</li>
+                                                    <li>— High quality and safe packing</li>
+                                                </ul>
+                                            </div>
+                                            <p class="mt-3">
+                                                <strong>We don't just build systems — we build confidence.</strong>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </article>
+                            </div>
+                        </div>
+                        <!-- Order Tracking Card -->
+                        <article class="card mt-4 shadow-sm dark-theme">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-md-4">
+                                    <img src="{% static 'app/img/Order tracking.png' %}"
+                                         class="img-fluid rounded-start h-100 object-fit-cover"
+                                         alt="Order tracking system"
+                                         loading="lazy">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h3 class="card-title h5">Order Tracking</h3>
+                                        <p class="card-text">
+                                            We provide real-time updates on the status of your order, ensuring you know when it will be delivered. You can see the progress of your build directly on the website, as well as via email notifications.
+                                        </p>
+                                        <div class="d-flex justify-content-md-end mt-4">
+                                            <a href="{% url 'store:index' %}" class="btn btn-primary btn-lg">Visit Store</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Blog Section -->
+        <section class="blog-section py-5 bg-light">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <h2 class="mb-4">Blog About PC Assembly</h2>
+                        <article class="card shadow-sm">
+                            <img src="{% static 'app/img/The Art of Building Your Own PC.webp' %}"
+                                 class="card-img-top"
+                                 alt="PC building guide and tips"
+                                 loading="lazy">
+                            <div class="card-body">
+                                <h3 class="card-title h5">The Art of Building Your Own PC</h3>
+                                <div class="card-text">
+                                    <p>
+                                        Building your own PC is more than just putting parts together — it's about understanding performance, compatibility, and your personal needs. Whether you're aiming for a high-end gaming platform or a reliable workstation, every build is a custom solution.
+                                    </p>
+                                    <p>
+                                        In this blog, we'll explore how to choose the right components, avoid common mistakes, and get the most out of your system. From selecting a motherboard to optimizing airflow, we've got you covered.
+                                    </p>
+                                    <p>
+                                        <strong>Knowledge is power, and a well-built PC is your ultimate tool.</strong>
+                                    </p>
+                                </div>
+                                <div class="d-flex justify-content-md-end mt-4">
+                                    <a href="{% url 'blog:index' %}" class="btn btn-primary btn-lg">Read Blog</a>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- Contact Section -->
+        <section class="contact-section py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <h2 class="mb-4">Get In Touch</h2>
+                        <article class="card shadow-sm">
+                            <div class="row g-0 align-items-center">
+                                <div class="col-md-4">
+                                    <img src="{% static 'app/img/Lets Build Something Awesome Together.avif' %}"
+                                         class="img-fluid rounded-start h-100 object-fit-cover"
+                                         alt="Contact us for custom PC builds">
+                                </div>
+                                <div class="col-md-8">
+                                    <div class="card-body">
+                                        <h3 class="card-title h5">Let's Build Something Awesome Together</h3>
+                                        <p class="card-text">
+                                            Whether you're looking to get a custom-built PC or collaborate on a software project — feel free to reach out. This site is not only a service hub but also part of my developer portfolio.
+                                        </p>
+                                        <p class="card-text">
+                                            Interested? Learn more <a href="{% url 'about:index' %}"
+    class="text-decoration-none fw-semibold">about me</a>, or jump straight into a <a href="{% url 'chat:contact_admin' %}"
+    class="text-decoration-none fw-semibold">chat</a> — I'm always up for something exciting.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock content %}

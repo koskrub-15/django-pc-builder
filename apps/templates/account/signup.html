@@ -1,0 +1,148 @@
+{% extends "_helpers/_base.html" %}
+{% load i18n static %}
+{% block title %}
+    Sign Up
+{% endblock title %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'app/styles/login.css' %}">
+    <style>
+        .main {
+            min-height: calc(100vh - 80px); /* 80px is the height of the header */
+            background-color: #f8f9fa;
+        }
+        .login-page {
+            margin-top: 2rem;
+        }
+    </style>
+{% endblock extra_css %}
+{% block content %}
+    <div class="main">
+        <div class="container login-page">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card login-card">
+                        <div class="card-header text-center">
+                            <h3 class="my-0">
+                                <i class="fas fa-user-plus me-2"></i>Sign Up
+                            </h3>
+                        </div>
+                        <div class="card-body">
+                            <form method="post"
+                                  action="{% url 'account_signup' %}"
+                                  class="needs-validation"
+                                  novalidate>
+                                {% csrf_token %}
+                                {% if form.non_field_errors %}
+                                    <div class="alert alert-danger" role="alert">
+                                        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div class="mb-3">
+                                    <label for="{{ form.username.id_for_label }}" class="form-label">
+                                        <i class="fas fa-user me-2"></i>Username
+                                    </label>
+                                    <input type="text"
+                                           name="{{ form.username.name }}"
+                                           class="form-control form-control-lg {% if form.username.errors %}is-invalid{% endif %}"
+                                           id="{{ form.username.id_for_label }}"
+                                           placeholder="Choose a username"
+                                           required
+                                           value="{% if form.username.value %}{{ form.username.value }}{% endif %}">
+                                    {% if form.username.errors %}<div class="invalid-feedback">{{ form.username.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="mb-3">
+                                    <label for="{{ form.email.id_for_label }}" class="form-label">
+                                        <i class="fas fa-envelope me-2"></i>Email
+                                    </label>
+                                    <input type="email"
+                                           name="{{ form.email.name }}"
+                                           class="form-control form-control-lg {% if form.email.errors %}is-invalid{% endif %}"
+                                           id="{{ form.email.id_for_label }}"
+                                           placeholder="Enter your email"
+                                           required
+                                           value="{% if form.email.value %}{{ form.email.value }}{% endif %}">
+                                    {% if form.email.errors %}<div class="invalid-feedback">{{ form.email.errors.0 }}</div>{% endif %}
+                                </div>
+                                <div class="mb-4">
+                                    <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                        <i class="fas fa-key me-2"></i>Password
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password"
+                                               name="{{ form.password1.name }}"
+                                               class="form-control form-control-lg {% if form.password1.errors %}is-invalid{% endif %}"
+                                               id="{{ form.password1.id_for_label }}"
+                                               placeholder="Create a password"
+                                               required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword1">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if form.password1.errors %}<div class="invalid-feedback">{{ form.password1.errors.0 }}</div>{% endif %}
+                                    </div>
+                                    <small class="form-text text-muted">{{ form.password1.help_text }}</small>
+                                </div>
+                                <div class="mb-4">
+                                    <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                        <i class="fas fa-key me-2"></i>Confirm Password
+                                    </label>
+                                    <div class="input-group">
+                                        <input type="password"
+                                               name="{{ form.password2.name }}"
+                                               class="form-control form-control-lg {% if form.password2.errors %}is-invalid{% endif %}"
+                                               id="{{ form.password2.id_for_label }}"
+                                               placeholder="Confirm your password"
+                                               required>
+                                        <button class="btn btn-outline-secondary" type="button" id="togglePassword2">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
+                                        {% if form.password2.errors %}<div class="invalid-feedback">{{ form.password2.errors.0 }}</div>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-user-plus me-2"></i>Create Account
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="card-footer text-center">
+                            <div class="small">
+                                Already have an account?
+                                <a href="{% url 'account_login' %}" class="signup-link">Sign In</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Toggle password visibility for password1
+            const togglePassword1 = document.querySelector('#togglePassword1');
+            const password1 = document.querySelector('#{{ form.password1.id_for_label }}');
+
+            if (togglePassword1 && password1) {
+                togglePassword1.addEventListener('click', function() {
+                    const type = password1.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password1.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
+
+            // Toggle password visibility for password2
+            const togglePassword2 = document.querySelector('#togglePassword2');
+            const password2 = document.querySelector('#{{ form.password2.id_for_label }}');
+
+            if (togglePassword2 && password2) {
+                togglePassword2.addEventListener('click', function() {
+                    const type = password2.getAttribute('type') === 'password' ? 'text' : 'password';
+                    password2.setAttribute('type', type);
+                    this.querySelector('i').classList.toggle('fa-eye');
+                    this.querySelector('i').classList.toggle('fa-eye-slash');
+                });
+            }
+        });
+        </script>
+    </div>
+{% endblock content %}

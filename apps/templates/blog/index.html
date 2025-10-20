@@ -1,0 +1,104 @@
+{% extends "_helpers/_base.html" %}
+{% block title %}
+    Blog
+{% endblock title %}
+{% block content %}
+    <div class="container py-4">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container py-5">
+                <header class="text-center mb-4">
+                    <h1 class="display-4 fw-bold">Blog About Computer Assembly</h1>
+                    <p class="lead">Latest news, guides, tips and insights about computer building</p>
+                </header>
+            </div>
+        </section>
+        {% block page_title %}
+            {% if user.is_authenticated and user.is_staff %}
+                <div class="d-flex justify-content-end mb-4">
+                    <a href="{% url 'blog:create_post' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Create New Post
+                    </a>
+                </div>
+            {% endif %}
+        {% endblock page_title %}
+        {% block page_content %}
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-3">{% include "_components/paginator.html" %}</div>
+            </div>
+            <div class="row g-4">
+                {% for post in page_obj %}
+                    <div class="col-12">
+                        <div class="card h-100 shadow-sm border-0">
+                            <div class="row g-0">
+                                {% if post.image %}
+                                    <div class="col-md-4">
+                                        <img src="{{ post.image.url }}"
+                                             class="img-fluid rounded-start h-100 post-image"
+                                             alt="{{ post.title }}">
+                                    </div>
+                                    <div class="col-md-8">
+                                    {% else %}
+                                        <div class="col-12">
+                                        {% endif %}
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                                <div>
+                                                    {% for category in post.categories.all %}
+                                                        <a href="{% url 'blog:blog_category' category.name %}"
+                                                           class="badge bg-primary text-decoration-none me-1">
+                                                            {{ category.name }}
+                                                        </a>
+                                                    {% endfor %}
+                                                </div>
+                                                <small class="text-muted">
+                                                    <i class="far fa-calendar-alt me-1"></i>
+                                                    {{ post.created_on.date|date:"M d, Y" }}
+                                                </small>
+                                            </div>
+                                            <h2 class="card-title h4 mb-3">
+                                                <a href="{% url 'blog:blog_detail' post.pk %}"
+                                                   class="text-decoration-none text-dark">{{ post.title }}</a>
+                                            </h2>
+                                            <p class="card-text text-muted mb-3">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ post.author }}
+                                            </p>
+                                            <p class="card-text">{{ post.body|striptags|truncatewords:30 }}</p>
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <a href="{% url 'blog:blog_detail' post.pk %}"
+                                                   class="btn btn-outline-primary">
+                                                    Read More<i class="fas fa-arrow-right ms-2"></i>
+                                                </a>
+                                                {% if post.comments.count > 0 %}
+                                                    <div class="text-muted small">
+                                                        <i class="far fa-comment me-1"></i>
+                                                        {{ post.comments.count }} comment{{ post.comments.count|pluralize }}
+                                                    </div>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12 text-center py-5">
+                            <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                            <h3>No posts yet</h3>
+                            <p class="text-muted">Check back later for new content!</p>
+                            {% if user.is_authenticated and user.is_staff %}
+                                <a href="{% url 'blog:create_post' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Create First Post
+                                </a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="card shadow-sm mt-4">
+                    <div class="card-body p-3">{% include "_components/paginator.html" %}</div>
+                </div>
+            {% endblock page_content %}
+        </div>
+    </div>
+{% endblock content %}

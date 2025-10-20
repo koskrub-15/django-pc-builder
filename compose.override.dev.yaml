@@ -1,0 +1,85 @@
+services:
+  app-wsgi:
+    build:
+      target: final
+    user: ${USER_ID:-1000}
+    environment:
+      DEBUG: "True"
+      DJANGO_SETTINGS_MODULE: "core.settings"
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes: &app_volumes
+      - ./:/wd/
+      - ./staticfiles:/wd/staticfiles
+      - ./media:/wd/media
+      - /wd/.venv/
+      - /wd/__pycache__/
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./manage.py
+          target: /wd/manage.py
+        - action: sync+restart
+          path: ./apps/
+          target: /wd/apps/
+        - action: sync+restart
+          path: ./core/
+          target: /wd/core/
+        - action: sync+restart
+          path: ./docker/app/
+          target: /docker/app/
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
+          path: uv.lock
+        - action: rebuild
+          path: .python-version
+    init: true
+
+  app-asgi:
+    build:
+      target: final
+    user: ${USER_ID:-1000}
+    environment:
+      DEBUG: "True"
+      DJANGO_SETTINGS_MODULE: "core.settings"
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes: *app_volumes
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./manage.py
+          target: /wd/manage.py
+        - action: sync+restart
+          path: ./apps/
+          target: /wd/apps/
+        - action: sync+restart
+          path: ./core/
+          target: /wd/core/
+        - action: sync+restart
+          path: ./docker/app/
+          target: /docker/app/
+        - action: rebuild
+          path: pyproject.toml
+        - action: rebuild
+          path: uv.lock
+        - action: rebuild
+          path: .python-version
+    init: true
+
+  nginx:
+    ports:
+      - "60000:80"
+
+  init:
+    user: ${USER_ID:-1000}
+    environment:
+      DEBUG: "True"
+    volumes: *app_volumes
+
+  postgres:
+    ports:
+      - "55432:5432"
+
+  redis:
+    ports:
+      - "6380:6380"

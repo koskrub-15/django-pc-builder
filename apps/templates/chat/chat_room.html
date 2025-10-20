@@ -1,0 +1,268 @@
+{% extends "_helpers/_base.html" %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% block title %}
+    Chat with admin
+{% endblock title %}
+{% block head_extra %}
+    <link href='{% static "app/styles/index.css" %}?v={% now "U" %}' />
+{% endblock head_extra %}
+{% block content %}
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        {% if request.user.is_staff %}
+                            <h3 class="mb-0">Chat with {{ thread.user.username }}</h3>
+                            <a href="{% url 'chat:thread_list' %}" class="btn btn-sm btn-light">All Chats</a>
+                        {% else %}
+                            <h3 class="mb-0">Chat with admin</h3>
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        {% if messages %}
+                            <div class="alert alert-info">
+                                {% for message in messages %}{{ message }}{% endfor %}
+                            </div>
+                        {% endif %}
+                        <div id="chat-box" class="chat-box p-3 mb-3 bg-light">
+                            {% for message in chat_messages %}
+                                <div class="message mb-2 {% if message.sender == request.user %}text-end{% endif %}">
+                                    <div class="message-content {% if message.sender == request.user %}bg-primary text-white{% else %}bg-secondary text-white{% endif %}">
+                                        <small class="d-block text-white-50">
+                                            {% if not request.user.is_staff and message.sender != request.user %}
+                                                Admin - {{ message.timestamp|date:"m/d/Y H:i" }}
+                                            {% else %}
+                                                {{ message.sender.username }} - {{ message.timestamp|date:"m/d/Y H:i" }}
+                                            {% endif %}
+                                        </small>
+                                        <span class="message-text">
+                                            {% autoescape off %}
+                                                {{ message.text }}
+                                            {% endautoescape %}
+                                        </span>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <div id="scroll-anchor"></div>
+                        </div>
+                        <form id="chat-form"
+                              method="post"
+                              action="{% url 'chat:send_message' thread.id %}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <label for="message-input" class="visually-hidden">Message</label>
+                                <input type="text"
+                                       id="message-input"
+                                       name="message"
+                                       class="form-control"
+                                       placeholder="Type your message..."
+                                       aria-label="Type your message">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            {% if request.user.is_staff %}
+                <div class="col-md-4">
+                    <!-- Create Order Form -->
+                    <div class="card shadow mb-3">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0">Create Order</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="post"
+                                  action="{% url 'chat:create_order_from_chat' thread.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="build-select" class="form-label">Select PC Build</label>
+                                    <select name="build_id" id="build-select" class="form-select mb-3" required>
+                                        <option value="">-- Select a build --</option>
+                                        {% for build in builds %}
+                                            <option value="{{ build.id }}">{{ build.name }} (€{{ build.total_price }})</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="markup" class="form-label">Markup</label>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="markup"
+                                           name="markup"
+                                           required
+                                           min="0"
+                                           step="0.01"
+                                           placeholder="Enter markup amount (€)">
+                                    <label for="address" class="form-label">Delivery Address</label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="address"
+                                           name="address"
+                                           required
+                                           placeholder="Enter delivery address">
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success">Create Order for Customer</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    <!-- Send Component List Form -->
+                    <div class="card shadow">
+                        <div class="card-header bg-info text-white">
+                            <h4 class="mb-0">Send Component List</h4>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" action="{% url 'chat:send_component_list' thread.id %}">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="component-build-select" class="form-label">Select PC Build</label>
+                                    <select name="build_id"
+                                            id="component-build-select"
+                                            class="form-select mb-3"
+                                            required>
+                                        <option value="">-- Select a build --</option>
+                                        {% for build in builds %}
+                                            <option value="{{ build.id }}">{{ build.name }} (€{{ build.total_price }})</option>
+                                        {% endfor %}
+                                    </select>
+                                    <label for="service-fee" class="form-label">Service Fee</label>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="service-fee"
+                                           name="service_fee"
+                                           required
+                                           min="0"
+                                           step="0.01"
+                                           placeholder="Enter service fee amount (€)">
+                                    <small class="form-text text-muted">Fee for component selection service</small>
+                                </div>
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-info">Send Component List</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+    <script>
+        // Initial scroll to bottom on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatBox = document.querySelector("#chat-box");
+            chatBox.scrollTop = chatBox.scrollHeight;
+        });
+
+        // Form submission with AJAX
+        document.getElementById('chat-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            const form = this;
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+
+            if (!message) return;
+
+            // Create form data
+            const formData = new FormData(form);
+
+            // Send message with fetch
+            fetch(form.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            }).then(response => {
+                if (response.ok) {
+                    // Clear input
+                    messageInput.value = '';
+                    // Update chat immediately
+                    updateChat(true);
+                }
+            }).catch(error => {
+                console.error('Error sending message:', error);
+            });
+        });
+
+        // Track if user has scrolled up to read messages
+        let userHasScrolled = false;
+        const chatBox = document.querySelector("#chat-box");
+
+        chatBox.addEventListener('scroll', function() {
+            // If user scrolls up more than 100px from bottom
+            userHasScrolled = chatBox.scrollHeight - chatBox.clientHeight - chatBox.scrollTop > 100;
+        });
+
+        // Get last message ID to track new messages
+        let lastMessageId = {% if chat_messages.last %}{{ chat_messages.last.id }}{% else %}0{% endif %};
+
+        // Determine if current user is staff (for consistent sender name display)
+        const isUserStaff = {% if request.user.is_staff %}true{% else %}false{% endif %};
+        const currentUsername = "{{ request.user.username }}";
+
+        // Update chat messages
+        function updateChat(forceScroll = false) {
+            fetch("{% url 'chat:get_messages' thread.id %}")
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.messages || !data.messages.length) return;
+
+                    const chatBox = document.querySelector("#chat-box");
+                    const hasNewMessages = data.messages.length > 0 && data.messages[data.messages.length-1].id > lastMessageId;
+
+                    if (hasNewMessages || forceScroll) {
+                        // Update lastMessageId
+                        lastMessageId = data.messages[data.messages.length-1].id;
+
+                        // Update messages
+                        chatBox.innerHTML = '';
+
+                        data.messages.forEach(msg => {
+                            const isCurrentUser = msg.sender === currentUsername;
+
+                            // Determine sender display name based on user role
+                            let senderDisplayName;
+                            if (isUserStaff) {
+                                // For staff users, show real username
+                                senderDisplayName = msg.sender;
+                            } else {
+                                // For regular users, show "Admin" for non-user messages
+                                senderDisplayName = isCurrentUser ? msg.sender : "Admin";
+                            }
+
+                            // Create HTML string for better control over formatting
+                            const messageHTML = `
+                                <div class="message mb-2 ${isCurrentUser ? 'text-end' : ''}">
+                                    <div class="message-content ${isCurrentUser ? 'bg-primary text-white' : 'bg-secondary text-white'}">
+                                        <small class="d-block text-white-50">${senderDisplayName} - ${new Date(msg.timestamp).toLocaleString()}</small>
+                                        <span class="message-text">${msg.text}</span>
+                                    </div>
+                                </div>
+                            `;
+
+                            chatBox.insertAdjacentHTML('beforeend', messageHTML);
+                        });
+
+                        // Add scroll anchor
+                        const scrollAnchor = document.createElement('div');
+                        scrollAnchor.id = 'scroll-anchor';
+                        chatBox.appendChild(scrollAnchor);
+
+                        // Scroll to bottom only if user hasn't scrolled up or if it's a forced update
+                        if (forceScroll || !userHasScrolled) {
+                            chatBox.scrollTop = chatBox.scrollHeight;
+                        }
+                    }
+                })
+                .catch(error => console.error('Error fetching messages:', error));
+        }
+
+        // Check for new messages every 5 seconds
+        setInterval(updateChat, 5000);
+
+        // Initial update
+        updateChat(true);
+    </script>
+{% endblock content %}

@@ -1,0 +1,57 @@
+{% extends "_helpers/_base.html" %}
+{% load i18n static %}
+{% block title %}
+    Logged Out
+{% endblock title %}
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'app/styles/login.css' %}">
+    <style>
+        .logout-message {
+            font-size: 1.1rem;
+            color: #6c757d;
+            margin-bottom: 2rem;
+        }
+        .logout-icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            color: #0d6efd;
+        }
+        .main {
+            min-height: calc(100vh - 80px); /* 80px is the height of the header */
+            background-color: #f8f9fa;
+        }
+        .login-page {
+            margin-top: 2rem;
+        }
+    </style>
+{% endblock extra_css %}
+{% block content %}
+    <div class="main">
+        <div class="container login-page">
+            <div class="row justify-content-center">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card login-card">
+                        <div class="card-body text-center p-5">
+                            <div class="logout-icon">
+                                <i class="fas fa-sign-out-alt"></i>
+                            </div>
+                            <h2 class="mb-3">You've been logged out</h2>
+                            <p class="logout-message">Thanks for spending some quality time with us today.</p>
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'account_login' %}" class="btn btn-primary">
+                                    <i class="fas fa-sign-in-alt me-2"></i>Log in again
+                                </a>
+                            </div>
+                        </div>
+                        <div class="card-footer text-center">
+                            <div class="small">
+                                Want to explore more?
+                                <a href="{% url 'home' %}" class="signup-link">Visit Homepage</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,142 @@
+{% extends "_helpers/_base.html" %}
+{% block title %}
+    Progress tracker
+{% endblock title %}
+{% block content %}
+    <div class="container mt-4">
+        <ul class="nav nav-tabs justify-content-center mb-4">
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/builder/tracker/' %}active{% endif %}"
+                   href="{% url 'builder:tracker' %}">Tracker</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/builder/builds/' %}active{% endif %}"
+                   href="{% url 'builder:builds' %}">Builds</a>
+            </li>
+        </ul>
+        <form method="post">
+            {% csrf_token %}
+            {% for order in orders %}
+                <div class="order-block mb-4 p-3 border rounded shadow-sm">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h4>{{ order.build }}</h4>
+                            <p class="mb-1">
+                                <strong>Customer:</strong> {{ order.customer }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Created on:</strong> {{ order.created_on }}
+                            </p>
+                            <p class="mb-1">
+                                <strong>Total Price:</strong> €{{ order.build.total_price }}
+                            </p>
+                        </div>
+                        <span class="badge bg-{% if order.progress.is_completed %}success{% elif order.progress.are_components_installed %}primary{% elif order.progress.are_components_ordered %}warning{% else %}secondary{% endif %} p-2">
+                            {% if order.progress.is_delivered %}
+                                Delivered
+                            {% elif order.progress.is_completed %}
+                                Completed
+                            {% elif order.progress.is_pc_build_tested %}
+                                Testing
+                            {% elif order.progress.are_components_installed %}
+                                Assembly
+                            {% elif order.progress.are_components_arrived %}
+                                Components Received
+                            {% elif order.progress.are_components_ordered %}
+                                Components Ordered
+                            {% else %}
+                                New
+                            {% endif %}
+                        </span>
+                    </div>
+                    <!-- Components accordion -->
+                    <div class="accordion mb-3" id="accordionOrder-{{ order.id }}">
+                        <div class="accordion-item border-info">
+                            <h2 class="accordion-header" id="heading-{{ order.id }}">
+                                <button class="accordion-button collapsed"
+                                        type="button"
+                                        data-bs-toggle="collapse"
+                                        data-bs-target="#collapse-{{ order.id }}"
+                                        aria-expanded="false"
+                                        aria-controls="collapse-{{ order.id }}">Components</button>
+                            </h2>
+                            <div id="collapse-{{ order.id }}"
+                                 class="accordion-collapse collapse"
+                                 aria-labelledby="heading-{{ order.id }}"
+                                 data-bs-parent="#accordionOrder-{{ order.id }}">
+                                <div class="accordion-body">
+                                    <ul class="list-group list-group-flush">
+                                        {% for component in order.build.components.all %}
+                                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                {{ component.name }}
+                                                <span class="badge bg-primary rounded-pill">€{{ component.price }}</span>
+                                            </li>
+                                        {% empty %}
+                                            <li class="list-group-item text-muted">No components in this build</li>
+                                        {% endfor %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h5>Progress:</h5>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="ordered-{{ order.id }}"
+                               name="ordered_{{ order.id }}"
+                               {% if order.progress.are_components_ordered %}checked{% endif %}>
+                        <label class="form-check-label" for="ordered-{{ order.id }}">Components Ordered</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="arrived-{{ order.id }}"
+                               name="arrived_{{ order.id }}"
+                               {% if order.progress.are_components_arrived %}checked{% endif %}>
+                        <label class="form-check-label" for="arrived-{{ order.id }}">Components Arrived</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="installed-{{ order.id }}"
+                               name="installed_{{ order.id }}"
+                               {% if order.progress.are_components_installed %}checked{% endif %}>
+                        <label class="form-check-label" for="installed-{{ order.id }}">Components Installed</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="tested-{{ order.id }}"
+                               name="tested_{{ order.id }}"
+                               {% if order.progress.is_pc_build_tested %}checked{% endif %}>
+                        <label class="form-check-label" for="tested-{{ order.id }}">PC Build Tested</label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="completed-{{ order.id }}"
+                               name="completed_{{ order.id }}"
+                               {% if order.progress.is_completed %}checked{% endif %}>
+                        <label class="form-check-label" for="completed-{{ order.id }}">
+                            Completed ({{ order.progress.completed_on|default:"Not completed" }})
+                        </label>
+                    </div>
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               id="delivered-{{ order.id }}"
+                               name="delivered_{{ order.id }}"
+                               {% if order.progress.is_delivered %}checked{% endif %}>
+                        <label class="form-check-label" for="delivered-{{ order.id }}">
+                            Delivered ({{ order.progress.delivered_on|default:"Not delivered" }})
+                        </label>
+                    </div>
+                </div>
+            {% empty %}
+                <div class="alert alert-info">No active orders</div>
+            {% endfor %}
+            {% if orders %}<button type="submit" class="btn btn-primary">Update Orders</button>{% endif %}
+        </form>
+    </div>
+{% endblock content %}

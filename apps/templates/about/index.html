@@ -1,0 +1,82 @@
+{% extends "_helpers/_base.html" %}
+{% load static %}
+{% block title %}
+    About me
+{% endblock title %}
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card mb-4 border-2">
+                    <div class="card-body">
+                        <h1 class="card-title">About me</h1>
+                    </div>
+                </div>
+                <div class="card mb-4 border-2">
+                    <div class="card-body">
+                        <h4 class="card-title mb-4">
+                            <strong>Kostiantyn</strong>
+                        </h4>
+                        <h6 class="card-subtitle mb-3 text-muted">Python Backend Developer</h6>
+                        <p class="card-text">
+                            Building scalable backend systems with Python and modern frameworks. Hands-on experience with production-ready APIs, database integration, and Docker-based environments.
+                        </p>
+                        <p class="card-text">
+                            <strong>Languages & Tools:</strong>
+                        </p>
+                        <ul class="mb-4">
+                            <li>Python (Flask, FastAPI, Django)</li>
+                            <li>PostgreSQL, SQLAlchemy, Celery</li>
+                            <li>Docker, Git, Nginx, WebSocket</li>
+                        </ul>
+                        <p class="card-text">
+                            <strong>Skills:</strong>
+                            <br>
+                            <strong>REST APIs</strong> design, async programming, <strong>database</strong> modeling, deployment with <strong>Docker</strong>, frontend basics (HTML/CSS).
+                        </p>
+                        <p class="card-text">
+                            Based in <strong>Germany</strong>, originally from <strong>Ukraine</strong>. Currently learning <strong>German</strong> and improving <strong>full-stack</strong> skills.
+                        </p>
+                    </div>
+                </div>
+                <div class="card mb-4 border-info">
+                    <div class="card-body ">
+                        <h2 class="card-title">Contact</h2>
+                        <div class="d-flex justify-content">
+                            {#                            here will be links to social networks with icons#}
+                            {#                            icons there apps/static/img/{service_name}.svg#}
+                            <a href="https://github.com/koskrub-15"
+                               class="btn btn-light"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <img src="{% static 'app/img/github.svg' %}" class="img-link" alt="GitHub">
+                            </a>
+                            <a href="https://t.me/koskrub15"
+                               class="btn btn-light"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <img src="{% static 'app/img/telegram.svg' %}"
+                                     class="img-link"
+                                     alt="Telegram">
+                            </a>
+                            <a href="https://www.linkedin.com/in/koskrub-15"
+                               class="btn btn-light"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <img src="{% static 'app/img/LinkedIn.svg' %}"
+                                     class="img-link"
+                                     alt="LinkedIN">
+                            </a>
+                            <a href="mailto:kostyan.krutyak15@gmail.com"
+                               class="btn btn-light"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                <img src="{% static 'app/img/gmail.svg' %}" class="img-link" alt="Gmail">
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock content %}

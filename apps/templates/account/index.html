@@ -1,0 +1,106 @@
+{% extends "_helpers/_base.html" %}
+{% block title %}
+    Profile
+{% endblock title %}
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card mb-4 border-2">
+                    <div class="card-body">
+                        <h1 class="card-title">Profile</h1>
+                        <h3 class="card-subtitle mb-2 text-muted">Hello, {{ user.username }}!</h3>
+                        <h4 class="card-text">
+                            Your email is <strong>{{ user.email }}</strong>.
+                        </h4>
+                    </div>
+                </div>
+                {% for order in orders %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h4 class="card-title">{{ order.build.name }}</h4>
+                            <h5 class="card-text">Price: €{{ order.total_price }}</h5>
+                            <p class="text-muted">Created on: {{ order.created_on }}</p>
+                            <div class="accordion mb-3" id="accordionOrder-{{ order.id }}">
+                                <div class="accordion-item border-info">
+                                    <h2 class="accordion-header" id="heading-{{ order.id }}">
+                                        <button class="accordion-button collapsed"
+                                                type="button"
+                                                data-bs-toggle="collapse"
+                                                data-bs-target="#collapse-{{ order.id }}"
+                                                aria-expanded="false"
+                                                aria-controls="collapse-{{ order.id }}">Components</button>
+                                    </h2>
+                                    <div id="collapse-{{ order.id }}"
+                                         class="accordion-collapse collapse"
+                                         aria-labelledby="heading-{{ order.id }}"
+                                         data-bs-parent="#accordionOrder-{{ order.id }}">
+                                        <div class="accordion-body">
+                                            <ul class="list-group list-group-flush">
+                                                {% for component in order.build.components.all %}<li class="list-group-item">{{ component.name }}</li>{% endfor %}
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="ordered-{{ order.id }}"
+                                           disabled
+                                           {% if order.progress.are_components_ordered %}checked{% endif %}>
+                                    <label class="form-check-label" for="ordered-{{ order.id }}">Components Ordered</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="arrived-{{ order.id }}"
+                                           disabled
+                                           {% if order.progress.are_components_arrived %}checked{% endif %}>
+                                    <label class="form-check-label" for="arrived-{{ order.id }}">Components Arrived</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="installed-{{ order.id }}"
+                                           disabled
+                                           {% if order.progress.are_components_installed %}checked{% endif %}>
+                                    <label class="form-check-label" for="installed-{{ order.id }}">Components Installed</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="tested-{{ order.id }}"
+                                           disabled
+                                           {% if order.progress.is_pc_build_tested %}checked{% endif %}>
+                                    <label class="form-check-label" for="tested-{{ order.id }}">PC Build Tested</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="completed-{{ order.id }}"
+                                           disabled
+                                           {% if order.progress.is_completed %}checked{% endif %}>
+                                    <label class="form-check-label" for="completed-{{ order.id }}">
+                                        Completed ({{ order.progress.completed_on|default:"Not completed" }})
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input"
+                                           type="checkbox"
+                                           id="delivered-{{ order.id }}"
+                                           disabled
+                                           {% if order.progress.is_delivered %}checked{% endif %}>
+                                    <label class="form-check-label" for="delivered-{{ order.id }}">
+                                        Delivered ({{ order.progress.delivered_on|default:"Not delivered" }})
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

@@ -1,0 +1,295 @@
+{% extends "_helpers/_base.html" %}
+{% load static %}
+{% block title %}
+    Store
+{% endblock title %}
+{% block content %}
+    <main class="store-page">
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="container py-5">
+                <header class="text-center mb-4">
+                    <h1 class="display-4 fw-bold">Custom PC Builds & Services</h1>
+                    <p class="lead">
+                        Order your custom PC through chat, choose from a range of services, and track your build every step of the way in your profile.
+                    </p>
+                </header>
+            </div>
+        </section>
+        <!-- Services Section -->
+        <section class="services-section py-5 bg-light">
+            <div class="container">
+                <div class="row justify-content-center mb-3">
+                    <div class="col-12 col-lg-10">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h2 class="card-title mb-4">Our Services</h2>
+                                <div class="row row-cols-1 row-cols-md-2 g-4">
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm">
+                                            <img src="{% static 'app/img/Personalized Component Selection.webp' %}"
+                                                 class="card-img-top"
+                                                 alt="Component Selection"
+                                                 loading="lazy">
+                                            <div class="card-body">
+                                                <h3 class="card-title h5">Personalized Component Selection</h3>
+                                                <p class="card-text">
+                                                    We hand-pick every component based on your needs and budget —
+                                                    whether you're a gamer,
+                                                    professional,
+                                                    or need something unique.
+                                                    Get expert advice on compatibility,
+                                                    performance and value.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm">
+                                            <img src="{% static 'app/img/Full PC Build.jpg' %}"
+                                                 class="card-img-top"
+                                                 alt="Full PC Build"
+                                                 loading="lazy">
+                                            <div class="card-body">
+                                                <h3 class="card-title h5">Full PC Build</h3>
+                                                <p class="card-text">
+                                                    We assemble your PC from the ground up with the highest standards for cable management, airflow and reliability. Every build is stress-tested and professionally packaged for delivery.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm">
+                                            <img src="{% static 'app/img/Assembly with Your Parts.webp' %}"
+                                                 class="card-img-top"
+                                                 alt="Bring Your Own Parts"
+                                                 loading="lazy">
+                                            <div class="card-body">
+                                                <h3 class="card-title h5">Assembly with Your Parts</h3>
+                                                <p class="card-text">
+                                                    Already have the components? Bring your own, and we’ll assemble your PC for you with the same care and attention to detail, including professional cable management and thermal optimization.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm">
+                                            <img src="{% static 'app/img/OS Installation & Tuning.webp' %}"
+                                                 class="card-img-top"
+                                                 alt="OS Installation & Tuning"
+                                                 loading="lazy">
+                                            <div class="card-body">
+                                                <h3 class="card-title h5">OS Installation & Tuning</h3>
+                                                <p class="card-text">
+                                                    We install the operating system of your choice, optimize system settings, and can also perform safe overclocking or undervolting for maximum performance or efficiency.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="mt-5">
+                                    <h3 class="mb-3">How to Place Your Order</h3>
+                                    <ol>
+                                        <li>Click the chat button below to start your order.</li>
+                                        <li>
+                                            Describe your preferences (services, usage, budget, parts, etc.), and we’ll recommend the best configuration or service package.
+                                        </li>
+                                        <li>
+                                            Once your order is confirmed, track your build in your <a href="{% url 'profile:index' %}" class="fw-semibold">profile</a> (link available after sign-in and order placement).
+                                        </li>
+                                    </ol>
+                                    <div class="d-flex justify-content-center mt-4">
+                                        <a href="{% url 'chat:contact_admin' %}"
+                                           class="btn btn-primary btn-lg px-5">Order Now (Chat)</a>
+                                    </div>
+                                    <div class="text-center mt-3">
+                                        <small class="text-muted">Personalized support and updates at every step — from your initial idea to final delivery and beyond.</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Spacer -->
+                <div class="row justify-content-center mb-3">
+                    <div class="col-8">
+                        <hr class="my-5 hr-thick">
+                    </div>
+                </div>
+                <!-- Quality, Warranty & Packaging Section -->
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body">
+                                <h2 class="card-title mb-4">Quality, Warranty & Packaging</h2>
+                                <div class="row row-cols-1 row-cols-md-2 g-4">
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm bg-success bg-opacity-10">
+                                            <div class="card-body">
+                                                <h3 class="card-title h5">Assembly Quality & Testing</h3>
+                                                <ul class="mb-2">
+                                                    <li>Meticulous cable management and thermal optimization</li>
+                                                    <li>Thorough stress testing for stability and reliability</li>
+                                                    <li>Professional attention to detail at every step</li>
+                                                </ul>
+                                                <p class="mb-0">
+                                                    <strong>Your PC is built for longevity and performance.</strong>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm bg-info bg-opacity-10">
+                                            <div class="card-body">
+                                                <h3 class="card-title h5">Safe & Secure Packaging</h3>
+                                                <ul class="mb-2">
+                                                    <li>Thick spacers and foam inserts provide full shock absorption</li>
+                                                    <li>All sensitive parts are wrapped in bubble wrap</li>
+                                                    <li>Secured with strong tape to prevent shifting</li>
+                                                    <li>Packaged for insured postal shipping with a paid guarantee from the postal service</li>
+                                                </ul>
+                                                <p class="mb-0">
+                                                    <strong>Your PC arrives safe and sound, ready to use out of the box.</strong>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="card h-100 shadow-sm bg-warning bg-opacity-10">
+                                            <div class="card-body">
+                                                <h3 class="card-title h5">Warranty & Support</h3>
+                                                <ul class="mb-2">
+                                                    <li>Warranty provided through insured postal shipment</li>
+                                                    <li>Free remote support for troubleshooting and setup queries</li>
+                                                    <li>Quick assistance via chat or your profile at any stage after purchase</li>
+                                                </ul>
+                                                <p class="mb-0">
+                                                    <strong>We stand behind our builds. Your peace of mind is guaranteed.</strong>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="alert alert-info my-4" role="alert">
+                                    <strong>Order tracking made easy!</strong> Monitor every stage — component selection, assembly, testing, shipping — directly in your <b>Profile</b>.
+                                    <br>
+                                    <span class="text-secondary">Profile access: <span class="text-primary fst-italic">
+                                        {% if user.is_authenticated %}
+                                            <a href="{% url 'profile:index' %}">Profile</a>
+                                        {% else %}
+                                            available after login
+                                        {% endif %}
+                                    </span></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- FAQ Section -->
+        <section class="faq-section py-5">
+            <div class="container">
+                <div class="row justify-content-center">
+                    <div class="col-12 col-lg-10">
+                        <h2 class="mb-4 text-center">Frequently Asked Questions</h2>
+                        <div class="accordion" id="faqAccordion">
+                            <div class="accordion-item">
+                                <h3 class="accordion-header" id="faq1">
+                                    <button class="accordion-button"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse1"
+                                            aria-expanded="true"
+                                            aria-controls="collapse1">How do you select the components?</button>
+                                </h3>
+                                <div id="collapse1"
+                                     class="accordion-collapse collapse show"
+                                     aria-labelledby="faq1"
+                                     data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        We discuss your requirements in the chat, then select components that best fit your goals and budget. We explain every choice, so you understand your build inside and out.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h3 class="accordion-header" id="faq2">
+                                    <button class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse2"
+                                            aria-expanded="false"
+                                            aria-controls="collapse2">Can I bring my own parts?</button>
+                                </h3>
+                                <div id="collapse2"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="faq2"
+                                     data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        Yes! If you already have components, bring or ship them to us. We’ll handle the full assembly and testing, just as we would with our own selected parts.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h3 class="accordion-header" id="faq3">
+                                    <button class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse3"
+                                            aria-expanded="false"
+                                            aria-controls="collapse3">What about warranty and support?</button>
+                                </h3>
+                                <div id="collapse3"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="faq3"
+                                     data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        Every assembly includes a warranty with insured postal shipping and comprehensive support. If you have any issues or queries, just reach out via chat or your profile.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h3 class="accordion-header" id="faq4">
+                                    <button class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse4"
+                                            aria-expanded="false"
+                                            aria-controls="collapse4">
+                                        Can you install the OS and optimize my system?
+                                    </button>
+                                </h3>
+                                <div id="collapse4"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="faq4"
+                                     data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        Yes! We can install any modern OS, set up drivers, benchmark your new PC, and even perform safe overclocking or undervolting for your needs.
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="accordion-item">
+                                <h3 class="accordion-header" id="faq5">
+                                    <button class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse5"
+                                            aria-expanded="false"
+                                            aria-controls="collapse5">How do I track my order?</button>
+                                </h3>
+                                <div id="collapse5"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="faq5"
+                                     data-bs-parent="#faqAccordion">
+                                    <div class="accordion-body">
+                                        All updates are in your <a href="{% url 'profile:index' %}">Profile</a>: order status, photos, shipping info, and support contacts.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+{% endblock content %}

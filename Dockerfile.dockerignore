@@ -1,0 +1,15 @@
+# Ignore all
+**
+
+# Exclude
+!uv.lock
+!pyproject.toml
+!.python-version
+!package.json
+!package-lock.json
+
+
+!manage.py
+!core/
+!apps/
+!docker/app/

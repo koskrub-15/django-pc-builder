@@ -1,0 +1,35 @@
+{% extends "_helpers/_base.html" %}
+{% block title %}
+    All Chats
+{% endblock title %}
+{% block content %}
+    <div class="container mt-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h2 class="mb-0">All Active Chats</h2>
+            </div>
+            <div class="card-body">
+                {% if threads %}
+                    <div class="list-group">
+                        {% for thread in threads %}
+                            <div class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                                <div>
+                                    <strong>{{ thread.user.username }}</strong>
+                                    <small class="text-muted d-block">Email: {{ thread.user.email }}</small>
+                                </div>
+                                <div>
+                                    <a href="{% url 'chat:chat_room' thread.id %}"
+                                       class="btn btn-sm btn-primary">
+                                        <i class="bi bi-chat-dots"></i> Open Chat
+                                    </a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">No active chats</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock content %}

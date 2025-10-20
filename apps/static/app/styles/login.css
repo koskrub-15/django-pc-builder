@@ -1,0 +1,84 @@
+/* Login Page Styles */
+.login-page {
+  background-color: #f8f9fa;
+}
+
+.login-card {
+  border: none;
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+}
+
+.login-card .card-header {
+  border-bottom: none;
+  background-color: #0d6efd;
+  color: white;
+  padding: 1.5rem;
+}
+
+.login-card .card-body {
+  padding: 2.5rem;
+}
+
+.login-card .form-control:focus {
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.login-card .btn-primary {
+  background-color: #0d6efd;
+  border: none;
+  padding: 0.75rem;
+  font-weight: 500;
+  transition: all 0.2s ease-in-out;
+}
+
+.login-card .btn-primary:hover {
+  background-color: #0b5ed7;
+  transform: translateY(-1px);
+}
+
+.login-card .input-group-text {
+  cursor: pointer;
+  background-color: #f8f9fa;
+  border-left: none;
+}
+
+.login-card .form-control:focus + .input-group-text {
+  border-color: #0d6efd;
+}
+
+.login-card .forgot-password {
+  color: #6c757d;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.login-card .forgot-password:hover {
+  color: #0d6efd;
+  text-decoration: underline;
+}
+
+.login-card .signup-link {
+  color: #0d6efd;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+.login-card .signup-link:hover {
+  color: #0a58ca;
+  text-decoration: underline;
+}
+
+/* Responsive adjustments */
+@media (max-width: 767.98px) {
+  .login-card .card-body {
+    padding: 1.5rem;
+  }
+
+  .login-card .card-header {
+    padding: 1rem;
+  }
+}

@@ -1,0 +1,333 @@
+{% extends "_helpers/_base.html" %}
+{% block title %}
+    List of builds and components
+{% endblock title %}
+{% block content %}
+    <div class="container mt-4">
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs justify-content-center mb-4">
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/builder/tracker/' %}active{% endif %}"
+                   href="{% url 'builder:tracker' %}">Tracker</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.path == '/builder/builds/' %}active{% endif %}"
+                   href="{% url 'builder:builds' %}">Builds</a>
+            </li>
+        </ul>
+        <div class="row">
+            <!-- Left Column - Form -->
+            <div class="col-md-8">
+                <div class="card border-primary p-3 mb-5 rounded shadow-sm">
+                    <div class="card-body">
+                        {% if build %}
+                            <h4 class="card-title">Update Build</h4>
+                        {% else %}
+                            <h4 class="card-title mb-4">Create a New PC Build</h4>
+                        {% endif %}
+                        <form method="post" class="mb-4 builder-form">
+                            {% csrf_token %}
+                            <!-- Build Name -->
+                            <div class="mb-3">
+                                <h5 class="card-subtitle text-muted">{{ form.name.label }}</h5>
+                                <label for="{{ form.name.id_for_label }}" class="form-label text-muted"></label>
+                                {{ form.name }}
+                            </div>
+                            <!-- Components Section -->
+                            <div id="component-container" class="mb-3">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-subtitle mb-4 text-muted">Components</h5>
+                                        <div id="components-list" class="mb-3">
+                                            {% if build %}
+                                                {% for component in build.components.all %}
+                                                    <div class="component-item mb-2">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div class="flex-grow-1 me-2">
+                                                                <label class="form-label">Component</label>
+                                                                <select name="components"
+                                                                        class="form-select"
+                                                                        onchange="calculateTotalPrice()">
+                                                                    <option value="">Select a component...</option>
+                                                                    {% for c in all_components %}
+                                                                        <option value="{{ c.id }}"
+                                                                                data-price="{{ c.price }}"
+                                                                                {% if c.id == component.id %}selected{% endif %}>
+                                                                            {{ c.name }}
+                                                                        </option>
+                                                                    {% endfor %}
+                                                                </select>
+                                                            </div>
+                                                            <button type="button"
+                                                                    class="btn btn-outline-danger btn-sm delete-component"
+                                                                    onclick="deleteComponent(this)"
+                                                                    title="Remove component">❌</button>
+                                                        </div>
+                                                    </div>
+                                                {% endfor %}
+                                            {% else %}
+                                                <div class="component-item mb-2">
+                                                    <div class="d-flex justify-content-between align-items-center">
+                                                        <div class="flex-grow-1 me-2">
+                                                            <label for="{{ form.component.id_for_label }}" class="form-label">{{ form.component.label }}</label>
+                                                            <select name="components"
+                                                                    class="form-select"
+                                                                    onchange="calculateTotalPrice()">
+                                                                <option value="">Select a component...</option>
+                                                                {% for component in all_components %}
+                                                                    <option value="{{ component.id }}" data-price="{{ component.price }}">{{ component.name }}</option>
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <button type="button"
+                                                                class="btn btn-outline-danger btn-sm delete-component"
+                                                                onclick="deleteComponent(this)"
+                                                                title="Remove component">❌</button>
+                                                    </div>
+                                                </div>
+                                            {% endif %}
+                                        </div>
+                                        <!-- Total Price Display -->
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div id="total-price-container">
+                                                <strong>Total Price: <span id="total-price">0.00€</span></strong>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-2 flex-wrap">
+                                <button type="button"
+                                        class="btn btn-outline-secondary"
+                                        onclick="addComponentSelect()">Add Component</button>
+                                <a href="{% url 'builder:create_component' %}"
+                                   class="btn btn-outline-primary">New Component</a>
+                                {% if build %}
+                                    <button type="submit" class="btn btn-success">Update Build</button>
+                                {% else %}
+                                    <button type="submit" class="btn btn-success">Create Build</button>
+                                {% endif %}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <!-- Right Column - Components Table -->
+            <div class="col-md-4">
+                <div class="card border-success p-3 mb-4 rounded shadow-sm">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="mb-0">Available Components</h5>
+                        <span class="badge bg-secondary">{{ all_components|length }}</span>
+                    </div>
+                    <div class="table-responsive builder-components-table">
+                        <table class="table table-sm table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Price</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for component in all_components %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold">{{ component.name }}</span>
+                                                {% if component.link %}<a href="{{ component.link }}" target="_blank" class="small text-muted">link</a>{% endif %}
+                                            </div>
+                                        </td>
+                                        <td>{{ component.price|default:"0.00" }}€</td>
+                                        <td>
+                                            {% url 'builder:edit_component' pk=component.pk as update_url %}
+                                            <a href="{{ update_url }}" class="btn btn-warning btn-sm">Update</a>
+                                        </td>
+                                    </tr>
+                                {% empty %}
+                                    <tr>
+                                        <td colspan="3" class="text-center">
+                                            <div class="alert alert-info mb-0">
+                                                No components found. <a href="{% url 'builder:create_component' %}">Create one</a> to get started.
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Available Builds Section -->
+    {% if not build %}
+        <div class="container">
+            <h3>Available Builds</h3>
+            <div class="row">
+                <div class="col-12">
+                    <div class="card border-2 p-3 mb-3 rounded shadow-sm">
+                        {% for build in builds %}
+                            <div class="mb-4 border-bottom pb-3">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <h4 class="mb-1">{{ build.name }}</h4>
+                                        <h5 class="text-primary">Total: {{ build.total_price }}€</h5>
+                                    </div>
+                                    <div>
+                                        {% url 'builder:update_build' pk=build.pk as update_url %}
+                                        <a href="{{ update_url }}" class="btn btn-warning btn-sm">Update</a>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead>
+                                            <tr>
+                                                <th scope="col">#</th>
+                                                <th scope="col">Name</th>
+                                                <th scope="col">Price</th>
+                                                <th scope="col">Link</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {% for component in build.components.all %}
+                                                <tr>
+                                                    <th scope="row">{{ forloop.counter }}</th>
+                                                    <td>{{ component.name }}</td>
+                                                    <td>{{ component.price }}€</td>
+                                                    <td>
+                                                        {% if component.link %}
+                                                            <a href="{{ component.link }}"
+                                                               target="_blank"
+                                                               class="btn btn-outline-primary btn-sm">Link</a>
+                                                        {% else %}
+                                                            <span class="text-muted">—</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endfor %}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        {% empty %}
+                            <div class="text-center py-4">
+                                <p class="text-muted">No builds yet. Create one above!</p>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+    <!-- Hidden component template for JavaScript -->
+    <script type="text/template" id="component-template">
+        <div class="component-item mb-2">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="flex-grow-1 me-2">
+                    <label class="form-label">Component</label>
+                    <select name="components" class="form-select" onchange="calculateTotalPrice()">
+                        <option value="">Select a component...</option>
+                        {% for component in all_components %}
+                        <option value="{{ component.id }}" data-price="{{ component.price|default:'0' }}">{{ component.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <button type="button" class="btn btn-outline-danger btn-sm delete-component" onclick="deleteComponent(this)" title="Remove component">❌</button>
+            </div>
+        </div>
+    </script>
+    <script>
+        // Component management
+        function addComponentSelect() {
+            const container = document.getElementById('components-list');
+            const template = document.getElementById('component-template');
+
+            if (template && container) {
+                const tempDiv = document.createElement('div');
+                tempDiv.innerHTML = template.innerHTML.trim();
+                const componentItem = tempDiv.firstChild;
+
+                container.appendChild(componentItem);
+                calculateTotalPrice();
+            }
+        }
+
+        function deleteComponent(button) {
+            const componentItem = button.closest('.component-item');
+            const container = document.getElementById('components-list');
+
+            // Prevent removing the last component
+            const componentItems = container.querySelectorAll('.component-item');
+            if (componentItems.length > 1) {
+                componentItem.remove();
+                calculateTotalPrice();
+            } else {
+                // Reset the last component instead of removing it
+                const select = componentItem.querySelector('select[name="components"]');
+                if (select) {
+                    select.value = '';
+                    calculateTotalPrice();
+                }
+            }
+        }
+
+        function calculateTotalPrice() {
+            let total = 0;
+            const selects = document.querySelectorAll('select[name="components"]');
+
+            selects.forEach(select => {
+                const selectedOption = select.options[select.selectedIndex];
+                if (selectedOption && selectedOption.value) {
+                    const price = parseFloat(selectedOption.getAttribute('data-price') || '0');
+                    total += isNaN(price) ? 0 : price;
+                }
+            });
+
+            const totalElement = document.getElementById('total-price');
+            if (totalElement) {
+                totalElement.textContent = total.toFixed(2) + '€';
+            }
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add change event listeners to existing selects
+            const existingSelects = document.querySelectorAll('select[name="components"]');
+            existingSelects.forEach(select => {
+                select.addEventListener('change', calculateTotalPrice);
+            });
+
+            // Calculate initial total
+            calculateTotalPrice();
+
+            // Ensure at least one component selector exists
+            const componentsList = document.getElementById('components-list');
+            if (componentsList && componentsList.children.length === 0) {
+                addComponentSelect();
+            }
+        });
+
+        // Form validation
+        document.querySelector('.builder-form')?.addEventListener('submit', function(e) {
+            const nameField = document.querySelector('input[name="name"]');
+            const componentSelects = document.querySelectorAll('select[name="components"]');
+
+            // Check if name is provided
+            if (!nameField || !nameField.value.trim()) {
+                e.preventDefault();
+                alert('Please enter a build name.');
+                nameField?.focus();
+                return;
+            }
+
+            // Check if at least one component is selected
+            const hasSelectedComponents = Array.from(componentSelects).some(select => select.value);
+            if (!hasSelectedComponents) {
+                e.preventDefault();
+                alert('Please select at least one component.');
+                return;
+            }
+        });
+    </script>
+{% endblock content %}
