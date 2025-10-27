@@ -4,8 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="6c162d54-98e7-4ff4-b7a5-ac66a2c1cbce" name="Changes" comment="Add initial project structure and configuration files">
+    <list default="true" id="6c162d54-98e7-4ff4-b7a5-ac66a2c1cbce" name="Changes" comment="Update README.md for project overview and setup instructions; add workspace configuration">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/about.md" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,12 +69,12 @@
       </RecentBranches>
     </option>
   </component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "git@github.com:koskrub-15/project_builder__bevz_konstantin__main.git",
-    "accountId": "17ff4a00-78cf-4b2f-bff4-8d99798ce598"
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;git@github.com:koskrub-15/project_builder__bevz_konstantin__main.git&quot;,
+    &quot;accountId&quot;: &quot;17ff4a00-78cf-4b2f-bff4-8d99798ce598&quot;
   }
-}]]></component>
+}</component>
   <component name="ProblemsViewState">
     <option name="selectedTabId" value="CurrentFile" />
   </component>
@@ -93,6 +95,8 @@
     "RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHELLCHECK.PATH": "C:\\Users\\kosty\\AppData\\Roaming\\JetBrains\\PyCharm2025.1\\plugins\\Shell Script\\linux\\amd64\\shellcheck",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultAutoModeForALLUsers.v1": "true",
+    "com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1": "true",
     "django.template.preview.state": "SHOW_EDITOR_AND_PREVIEW",
     "git-widget-placeholder": "main",
     "junie.onboarding.icon.badge.shown": "true",
@@ -131,8 +135,8 @@
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
-        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.26830.99" />
-        <option value="bundled-python-sdk-164cda30dcd9-0af03a5fa574-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.26830.99" />
+        <option value="bundled-js-predefined-d6986cc7102b-3aa1da707db6-JavaScript-PY-252.27397.106" />
+        <option value="bundled-python-sdk-4e2b1448bda8-9a97661f3031-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.27397.106" />
       </set>
     </attachedChunks>
   </component>
@@ -175,7 +179,8 @@
       <workItem from="1759491905452" duration="47000" />
       <workItem from="1759492715086" duration="1975000" />
       <workItem from="1759688936021" duration="19000" />
-      <workItem from="1760986715398" duration="630000" />
+      <workItem from="1760986715398" duration="865000" />
+      <workItem from="1761595831129" duration="977000" />
     </task>
     <task id="LOCAL-00001" summary="first version of app, added simple blog">
       <option name="closed" value="true" />
@@ -241,7 +246,15 @@
       <option name="project" value="LOCAL" />
       <updated>1760987087415</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Update README.md for project overview and setup instructions; add workspace configuration">
+      <option name="closed" value="true" />
+      <created>1760987387965</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1760987387965</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -271,6 +284,7 @@
     <MESSAGE value="Refactor Docker setup and enhance ASGI/WSGI configurations; update email settings and static file handling" />
     <MESSAGE value="Refactor forms and templates for improved user experience and validation; update email configuration placeholders and add dark theme styles." />
     <MESSAGE value="Add initial project structure and configuration files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add initial project structure and configuration files" />
+    <MESSAGE value="Update README.md for project overview and setup instructions; add workspace configuration" />
+    <option name="LAST_COMMIT_MESSAGE" value="Update README.md for project overview and setup instructions; add workspace configuration" />
   </component>
 </project>

@@ -1,42 +1,24 @@
-# Django Project Builder
-
----
-
-## 🚀 Quick Start
-
-### Prerequisites
-- Docker & Docker Compose
-- Python 3.11+
-- [just](https://github.com/casey/just) (optional, but recommended)
-
-### 🏠 Homework Setup
-
-Run everything from zero with a single command:
-
-```shell
-just homework-i-docker-i-run
-```
-
-Completely reset the environment:
-
-```shell
-just homework-i-docker-i-purge
-```
+# Django PC Builder & E-Commerce Platform
 
 ---
 
 ## 📋 Overview
 
-A Django-based web application combining synchronous WSGI endpoints and asynchronous ASGI (WebSocket) features. Nginx serves static/media files and proxies requests to `app-wsgi` (WSGI) and `app-asgi` (ASGI/Daphne). Docker Compose orchestrates all services.
+This is a full-featured web application built with Django that serves as a portfolio project. It combines a PC building service, an e-commerce platform, a real-time chat system, and a content blog. The application is containerized using Docker and includes a comprehensive set of features for both users and administrators.
 
 ### Key Features
-- **Django Apps**: `blog`, `builder`, `chat`, `store`, `profile`, `about`
-- **WebSocket Chat**: Real-time communication using Django Channels (ASGI/Daphne)
-- **Static & Media Files**: Served efficiently by Nginx
-- **Health Monitoring**: Endpoint at `/health/`
-- **Docker-Ready**: Pre-configured setup for development and production
+- **PC Builder & Quoting:** Allows administrators to manage a list of PC components. Users can view pre-configured PC builds with dynamically calculated total prices.
+- **Order & Tracking System:** Customers can place orders for PC builds. A detailed, step-by-step progress tracker allows customers to monitor their order status in real-time (e.g., components ordered, build in progress, testing, delivered).
+- **Real-Time Chat:** A WebSocket-based chat system using Django Channels enables customers to communicate directly with administrators. It's deeply integrated with the builder, allowing admins to send component lists and create orders directly from the chat interface.
+- **Blog Platform:** A complete blogging system with posts, categories, and comments for sharing articles about PC hardware, builds, and gaming.
+- **User Authentication:** Robust user management powered by `django-allauth`, supporting user registration, login/logout, and profile management.
+- **Dockerized Environment:** The entire application stack (Nginx, Django WSGI, Django ASGI) is managed by Docker Compose for easy setup and deployment.
 
 ### Architecture
+The architecture uses Nginx as a reverse proxy to serve static/media files and route requests to the appropriate backend service:
+- **app-wsgi (Gunicorn):** Handles standard synchronous HTTP requests for most of the Django application.
+- **app-asgi (Daphne):** Manages asynchronous WebSocket connections for the real-time chat feature.
+
 ```
 ┌─────────┐    ┌──────────┐    ┌───────────┐
 │ Nginx   │───▶│ app-wsgi │    │ app-asgi  │
@@ -49,23 +31,25 @@ A Django-based web application combining synchronous WSGI endpoints and asynchro
 
 ---
 
-## 🗂️ Repository Structure
+## 🚀 Quick Start
 
+### Prerequisites
+- Docker & Docker Compose
+- Python 3.11+
+- [just](https://github.com/casey/just) (optional, but recommended for convenience)
+
+### Full Docker Setup
+
+This single command will build the Docker images, apply database migrations, and start all services.
+
+```shell
+just homework-i-docker-i-run
 ```
-.
-├── core/              # Django project (settings, urls, asgi, wsgi)
-├── apps/              # Django applications
-│   ├── blog/
-│   ├── chat/
-│   ├── builder/
-│   └── ...
-├── docker/            # Container configs
-│   └── nginx/         # Nginx configuration files
-├── staticfiles/       # Collected static files
-├── media/             # User-uploaded media
-├── compose.yaml       # Docker Compose base config
-├── compose.override.dev.yaml  # Development overrides
-└── requirements.txt   # Python dependencies
+
+To completely stop and remove all containers, networks, and volumes:
+
+```shell
+just homework-i-docker-i-purge
 ```
 
 ---
@@ -74,16 +58,17 @@ A Django-based web application combining synchronous WSGI endpoints and asynchro
 
 ### Build & Run
 
-```shell
-# Using just (recommended)
-just d-run
+If you are not using `just`, you can run the services manually:
 
-# Or manually
+```shell
+# Build and start containers in detached mode
 docker compose build
 docker compose up -d
 ```
 
 ### View Logs
+
+You can monitor the logs for each service:
 
 ```shell
 docker compose logs -f nginx      # Nginx logs
@@ -97,162 +82,52 @@ docker compose logs -f app-asgi   # ASGI/WebSocket logs
 docker compose down
 ```
 
-### Complete Reset
-
-```shell
-# Using just
-just d-purge
-
-# Or manually
-docker compose down -v
-docker volume prune -f
-```
-
-### Development Mode
-
-Use `compose.override.dev.yaml` for:
-- Bind mounts for live code reload
-- Debug settings
-- Development tools
-
 ---
 
 ## 💻 Local Development (Without Docker)
 
-### 1. Initialize Environment with uv
+### 1. Initialize Environment
+
+It's recommended to use `uv` for managing the virtual environment and dependencies.
 
 ```shell
-# Create project structure
-uv init
-
-# Sync dependencies
+# Create a virtual environment and install dependencies
 uv sync
-```
 
-### 2. Traditional Setup (Alternative)
-
-```shell
-# Create virtual environment
-python -m venv .venv
+# Activate the virtual environment
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
 ```
 
-### 3. Database & Static Files
+### 2. Database & Static Files
 
 ```shell
-# Run migrations
+# Run database migrations
 python manage.py migrate
 
-# Collect static files
+# Collect static files (for production simulation)
 python manage.py collectstatic --no-input
 ```
 
-### 4. Run Services
+### 3. Run Services
+
+You need to run the WSGI and ASGI servers in separate terminals.
 
 ```shell
-# WSGI server (development)
+# Terminal 1: Run the WSGI development server
 python manage.py runserver
-
-# ASGI server (Daphne) - in another terminal
-daphne --bind 0.0.0.0 --port 8001 --access-log - --proxy-headers --verbosity 2 core.asgi:application
 ```
-
-### Quick Dev Setup
 
 ```shell
-just init-i-dev  # Creates venv, installs deps, configures pre-commit
+# Terminal 2: Run the ASGI server (Daphne) for WebSockets
+daphne --bind 0.0.0.0 --port 8001 core.asgi:application
 ```
 
----
+### Quick Dev Setup with `just`
 
-## 🌐 Nginx Configuration
+The `just init-i-dev` command automates the setup of the virtual environment, dependency installation, and pre-commit hooks.
 
-### Routing Rules
-
-| Path | Target | Purpose |
-|------|--------|---------|
-| `/wd/app/static/` | `/var/www/static/` | Static files (CSS, JS) |
-| `/media/` | `/var/www/media/` | User-uploaded media |
-| `/ws/`, `/admin/ws/` | `django_asgi:8001` | WebSocket connections |
-| `/health/` | Direct response | Health check endpoint |
-| `/` | `django_wsgi:8000` | Main application |
-
-### Key Files
-- `docker/nginx/default.conf` - Site configuration
-- `docker/nginx/nginx.conf` - Main Nginx config
-
----
-
-## 📁 Static & Media Files
-
-### Configuration
-
-Ensure `core/settings.py` contains:
-
-```python
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
-```
-
-### Docker Volumes
-
-- **Nginx**: `/var/www/media/`
-- **App containers**: `/wd/media/`
-
-### Troubleshooting 404 Errors
-
-```shell
-# Check if files exist in container
-docker compose exec nginx ls -la /var/www/media/
-
-# Verify volume mounts
-docker compose config
-
-# Check permissions
-docker compose exec app-wsgi ls -la /wd/media/
-```
-
----
-
-## 🔌 WebSocket Support (Django Channels)
-
-### Configuration
-
-- **ASGI App**: Configured in `core/asgi.py`
-- **Daphne Server**: Runs on port 8001 with `--proxy-headers`
-- **Consumers**: Located in `apps/chat/consumers.py`
-- **Routing**: Defined in `apps/chat/routing.py`
-
-### WebSocket Troubleshooting
-
-```shell
-# Check Daphne logs
-docker compose logs -f app-asgi
-
-# Verify Nginx passes correct headers (Upgrade, Connection)
-docker compose exec nginx cat /etc/nginx/conf.d/default.conf | grep -A 10 "ws"
-```
-
-Ensure Nginx configuration includes:
-
-```nginx
-proxy_set_header Upgrade $http_upgrade;
-proxy_set_header Connection "upgrade";
-```
-
----
-
-## 🧪 Testing
-
-```shell
-# Using Docker
-docker compose exec app-wsgi python manage.py test
-
-# Locally
-python manage.py test
+```bash
+just init-i-dev
 ```
 
 ---
@@ -261,28 +136,31 @@ python manage.py test
 
 ### Database Migrations
 
+When you change your models, you need to create and apply migrations.
+
 ```shell
-# Create migrations
+# Create new migration files based on model changes
 python manage.py makemigrations
 
-# Apply migrations (Docker)
+# Apply migrations to the database (Docker)
 docker compose exec app-wsgi python manage.py migrate
-
-# Apply migrations (local)
-python manage.py migrate
 ```
 
 ### Create Superuser
 
+To access the Django admin interface (`/admin/`), you need a superuser account.
+
 ```shell
-# Docker
+# Using Docker
 docker compose exec app-wsgi python manage.py createsuperuser
 
-# Local
+# Locally
 python manage.py createsuperuser
 ```
 
-### View All Commands
+### List All `just` Commands
+
+To see a list of all available helper commands:
 
 ```shell
 just --list
@@ -290,54 +168,14 @@ just --list
 
 ---
 
-## 🔧 Troubleshooting
+## 🧪 Testing
 
-### Issue: Media files return 404
+Run the test suite to ensure application stability.
 
-**Solutions:**
-1. Verify `MEDIA_URL = "/media/"` in settings
-2. Check file permissions in container
-3. Confirm volume mounts are correct
-4. Restart Nginx: `docker compose restart nginx`
+```shell
+# Using Docker
+docker compose exec app-wsgi python manage.py test
 
-### Issue: WebSocket connections fail
-
-**Solutions:**
-1. Check Daphne is running: `docker compose ps app-asgi`
-2. Verify Nginx WebSocket proxy configuration
-3. Check browser console for errors
-4. Review Daphne logs for connection attempts
-
-### Issue: Static files not loading
-
-**Solutions:**
-1. Run `python manage.py collectstatic --no-input`
-2. Verify `STATIC_ROOT` and `STATIC_URL` in settings
-3. Check Nginx static file alias configuration
-
----
-
-## 📚 Additional Resources
-
-- **just Commands**: See `just/` directory for task definitions
-- **Nginx Config**: `docker/nginx/` directory
-- **Django Apps**: Explore `apps/` directory structure
-
----
-
-## 🤝 Contributing
-
-1. Follow existing patterns in `apps/` directory
-2. Create migrations after model changes: `python manage.py makemigrations`
-3. Use `just` tasks for common workflows
-4. Write tests for new features
-
----
-
-## 📄 License
-
-Check repository `LICENSE` file or contact maintainers.
-
----
-
-**Made with ❤️ using Django, Docker, and just**
+# Locally
+python manage.py test
+```
