@@ -1,7 +1,7 @@
 [project]
 name = "prepare-to-final-django-project"
 version = "0.1.0"
-description = "Add your description here"
+description = "Django PC Builder & E-Commerce Platform"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
