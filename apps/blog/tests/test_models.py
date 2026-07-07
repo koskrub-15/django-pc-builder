@@ -23,9 +23,9 @@ class PostModelTest(TestCase):
         self.assertIn("Test Post", repr(self.post))
 
     def test_default_ordering_is_by_last_modified_desc(self) -> None:
-        Post.objects.create(title="Older", body="x")
+        newer = Post.objects.create(title="Newer", body="x")
         posts = list(Post.objects.all())
-        self.assertEqual(posts[0], self.post)
+        self.assertEqual(posts[0], newer)
 
 
 class CommentModelTest(TestCase):
