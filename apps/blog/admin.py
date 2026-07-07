@@ -1,5 +1,3 @@
-# blog/admin.py
-
 from django.contrib import admin
 
 from apps.blog.models.posts import Category, Comment, Post

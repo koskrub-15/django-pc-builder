@@ -4,7 +4,6 @@ from typing import Any
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -20,7 +19,6 @@ from .utils.send_mail import create_order, notify_admin_about_message
 @login_required
 def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
     thread = get_object_or_404(ChatThread, id=thread_id)
-
     chat_messages = ChatMessage.objects.filter(thread=thread).order_by("timestamp")
 
     context: dict[str, Any] = {
@@ -36,28 +34,19 @@ def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
 
 @login_required
 def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
-    """Send a new message in the chat via HTTP POST."""
     if request.method == "POST":
         thread = get_object_or_404(ChatThread, id=thread_id)
         message_text = request.POST.get("message", "").strip()
 
         if message_text:
             last_message = (
-                ChatMessage.objects.filter(
-                    thread=thread,
-                    sender=request.user,
-                )
+                ChatMessage.objects.filter(thread=thread, sender=request.user)
                 .order_by("-timestamp")
                 .first()
             )
 
-            time_limit = timedelta(hours=1)
-            notify_admin = not last_message or (timezone.now() - last_message.timestamp > time_limit)
-            ChatMessage.objects.create(
-                thread=thread,
-                sender=request.user,
-                text=message_text,
-            )
+            notify_admin = not last_message or (timezone.now() - last_message.timestamp > timedelta(hours=1))
+            ChatMessage.objects.create(thread=thread, sender=request.user, text=message_text)
 
             if notify_admin and not request.user.is_staff:
                 notify_admin_about_message(
@@ -71,7 +60,6 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
 
 @login_required
 def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
-    """Get all messages for a thread in JSON format."""
     thread = get_object_or_404(ChatThread, id=thread_id)
 
     if not request.user.is_staff and request.user != thread.user:
@@ -84,7 +72,6 @@ def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
         last_id = 0
 
     messages_query = ChatMessage.objects.filter(thread=thread).order_by("timestamp")
-
     if last_id > 0 and request.GET.get("only_new", "") == "true":
         messages_query = messages_query.filter(id__gt=last_id)
 
@@ -111,7 +98,6 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
         return redirect("chat:chat_room", thread_id=thread.id)
 
     customer = thread.user
-
     build_id = request.POST.get("build_id")
     address = request.POST.get("address", "").strip()
     markup = request.POST.get("markup", "0").strip()
@@ -165,7 +151,6 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
 @login_required
 @transaction.atomic
 def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
-    """Send a component list with a service fee without creating an order."""
     thread = get_object_or_404(ChatThread, id=thread_id)
 
     if not request.user.is_staff:
@@ -188,10 +173,8 @@ def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
                 '<table class="table table-bordered table-sm mb-0" style="background:white;">'
                 "<thead><tr><th>#</th><th>Component</th><th>Price (€)</th></tr></thead><tbody>"
             )
-
             for idx, component in enumerate(build.components.all(), 1):
                 components_html += f"<tr><td>{idx}</td><td>{component.name}</td><td>{component.price:.2f}</td></tr>"
-
             components_html += "</tbody></table>"
 
             ChatMessage.objects.create(
@@ -220,14 +203,7 @@ def thread_list(request: HttpRequest) -> HttpResponse:
     return render(request, "chat/thread_list.html", {"threads": threads})
 
 
-def get_or_create_thread_with_admin(user: User) -> ChatThread:
-    thread = ChatThread.objects.filter(user=user).first()
-    if not thread:
-        thread = ChatThread.objects.create(user=user)
-    return thread
-
-
 @login_required
 def contact_admin(request: HttpRequest) -> HttpResponse:
-    thread = get_or_create_thread_with_admin(request.user)
+    thread, _ = ChatThread.objects.get_or_create(user=request.user)
     return redirect("chat:chat_room", thread_id=thread.id)

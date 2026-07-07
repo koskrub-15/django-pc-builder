@@ -1,7 +1,6 @@
 from typing import ClassVar
 
 from django import forms
-from django.forms import modelformset_factory
 
 from apps.builder.models.pc_build import PCBuild, PCComponent
 
@@ -33,4 +32,3 @@ class PCComponentForm(forms.ModelForm):
         }
 
 
-ComponentFormSet = modelformset_factory(PCComponent, form=PCComponentForm, extra=1)

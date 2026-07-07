@@ -16,11 +16,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         self.thread_id = self.scope["url_route"]["kwargs"]["thread_id"]
         self.room_group_name = f"chat_{self.thread_id}"
 
-        # Add user to chat group
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
-        # Send connection confirmation
         await self.send(
             text_data=json.dumps(
                 {
@@ -38,7 +36,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             data = json.loads(text_data)
             message = data["message"]
 
-            # Check if user is authenticated
             if self.scope["user"].is_anonymous:
                 await self.send(
                     text_data=json.dumps(
@@ -54,10 +51,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             sender = await self.get_user(user_id)
             thread = await self.get_thread()
 
-            # Save message to database
             await self.save_message(thread, sender, message)
 
-            # Send message to all participants in the group
             await self.channel_layer.group_send(
                 self.room_group_name,
                 {
@@ -67,7 +62,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 },
             )
         except (json.JSONDecodeError, KeyError) as e:
-            # Send error message to sender for specific JSON/Key errors
             await self.send(
                 text_data=json.dumps(
                     {
@@ -78,7 +72,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             logger.exception("Message format error")
         except (User.DoesNotExist, ChatThread.DoesNotExist):
-            # Send error message for database errors
             await self.send(
                 text_data=json.dumps(
                     {
@@ -89,7 +82,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
             logger.exception("Database error")
         except Exception:
-            # Send error message to sender for unexpected errors
             await self.send(
                 text_data=json.dumps(
                     {
@@ -101,7 +93,6 @@ class ChatConsumer(AsyncWebsocketConsumer):
             logger.exception("Unexpected error in chat consumer")
 
     async def chat_message(self, event: dict[str, Any]) -> None:
-        # Send message to WebSocket
         await self.send(
             text_data=json.dumps(
                 {
