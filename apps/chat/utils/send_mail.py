@@ -17,7 +17,7 @@ def notify_admin_about_message(user_email: str, username: str, user_message: str
     )
     msg = EmailMultiAlternatives(subject, html_content, settings.DEFAULT_FROM_EMAIL, [settings.DEFAULT_FROM_EMAIL])
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=False)
+    msg.send(fail_silently=True)
     logger.info("Email sent to admin: %s", subject)
 
 
@@ -34,7 +34,7 @@ def notify_user_about_order(user_email: str, username: str, order: PCBuildOrder,
     )
     msg = EmailMultiAlternatives(subject, html_content, settings.DEFAULT_FROM_EMAIL, [user_email])
     msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=False)
+    msg.send(fail_silently=True)
 
 
 def create_order(user_email: str, username: str, order: PCBuildOrder) -> None:

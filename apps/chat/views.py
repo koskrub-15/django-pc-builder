@@ -2,6 +2,8 @@ from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db import transaction
@@ -48,6 +50,15 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
             notify_admin = not last_message or (timezone.now() - last_message.timestamp > timedelta(hours=1))
             ChatMessage.objects.create(thread=thread, sender=request.user, text=message_text)
 
+            async_to_sync(get_channel_layer().group_send)(
+                f"chat_{thread_id}",
+                {
+                    "type": "chat_message",
+                    "message": message_text,
+                    "sender": request.user.username,
+                },
+            )
+
             if notify_admin and not request.user.is_staff:
                 notify_admin_about_message(
                     user_email=request.user.email,
@@ -55,6 +66,8 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
                     user_message=message_text,
                 )
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return HttpResponse(status=204)
     return redirect("chat:chat_room", thread_id=thread_id)
 
 

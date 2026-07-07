@@ -78,31 +78,35 @@ class SendMessageViewTest(TestCase):
         self.thread = ChatThread.objects.create(user=self.user)
         self.client.login(username="user", password="pass")
 
+    @patch("apps.chat.views.async_to_sync")
     @patch("apps.chat.views.notify_admin_about_message")
-    def test_post_creates_message(self, mock_notify: object) -> None:
+    def test_post_creates_message(self, mock_notify: object, mock_async: object) -> None:
         self.client.post(
             reverse("chat:send_message", args=[self.thread.id]),
             {"message": "Hello admin"},
         )
         self.assertEqual(ChatMessage.objects.filter(thread=self.thread).count(), 1)
 
+    @patch("apps.chat.views.async_to_sync")
     @patch("apps.chat.views.notify_admin_about_message")
-    def test_empty_message_is_ignored(self, mock_notify: object) -> None:
+    def test_empty_message_is_ignored(self, mock_notify: object, mock_async: object) -> None:
         self.client.post(
             reverse("chat:send_message", args=[self.thread.id]),
             {"message": "   "},
         )
         self.assertEqual(ChatMessage.objects.filter(thread=self.thread).count(), 0)
 
+    @patch("apps.chat.views.async_to_sync")
     @patch("apps.chat.views.notify_admin_about_message")
-    def test_first_message_notifies_admin(self, mock_notify: object) -> None:
+    def test_first_message_notifies_admin(self, mock_notify: object, mock_async: object) -> None:
         self.client.post(
             reverse("chat:send_message", args=[self.thread.id]),
             {"message": "Need help"},
         )
         mock_notify.assert_called_once()
 
-    def test_staff_message_does_not_notify_admin(self) -> None:
+    @patch("apps.chat.views.async_to_sync")
+    def test_staff_message_does_not_notify_admin(self, mock_async: object) -> None:
         staff = User.objects.create_user(username="staff", password="pass", is_staff=True)
         self.client.login(username="staff", password="pass")
         with patch("apps.chat.views.notify_admin_about_message") as mock_notify:
@@ -111,6 +115,25 @@ class SendMessageViewTest(TestCase):
                 {"message": "Staff reply"},
             )
             mock_notify.assert_not_called()
+
+    @patch("apps.chat.views.async_to_sync")
+    @patch("apps.chat.views.notify_admin_about_message")
+    def test_ajax_request_returns_204(self, mock_notify: object, mock_async: object) -> None:
+        response = self.client.post(
+            reverse("chat:send_message", args=[self.thread.id]),
+            {"message": "Hello"},
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 204)
+
+    @patch("apps.chat.views.async_to_sync")
+    @patch("apps.chat.views.notify_admin_about_message")
+    def test_normal_request_redirects(self, mock_notify: object, mock_async: object) -> None:
+        response = self.client.post(
+            reverse("chat:send_message", args=[self.thread.id]),
+            {"message": "Hello"},
+        )
+        self.assertEqual(response.status_code, 302)
 
 
 class ThreadListViewTest(TestCase):

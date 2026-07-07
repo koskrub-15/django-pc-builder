@@ -148,121 +148,58 @@
         </div>
     </div>
     <script>
-        // Initial scroll to bottom on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            const chatBox = document.querySelector("#chat-box");
-            chatBox.scrollTop = chatBox.scrollHeight;
-        });
-
-        // Form submission with AJAX
-        document.getElementById('chat-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-
-            const form = this;
-            const messageInput = document.getElementById('message-input');
-            const message = messageInput.value.trim();
-
-            if (!message) return;
-
-            // Create form data
-            const formData = new FormData(form);
-
-            // Send message with fetch
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            }).then(response => {
-                if (response.ok) {
-                    // Clear input
-                    messageInput.value = '';
-                    // Update chat immediately
-                    updateChat(true);
-                }
-            }).catch(error => {
-                console.error('Error sending message:', error);
-            });
-        });
-
-        // Track if user has scrolled up to read messages
-        let userHasScrolled = false;
         const chatBox = document.querySelector("#chat-box");
+        const isUserStaff = {% if request.user.is_staff %}true{% else %}false{% endif %};
+        const currentUsername = "{{ request.user.username }}";
+        let userHasScrolled = false;
 
-        chatBox.addEventListener('scroll', function() {
-            // If user scrolls up more than 100px from bottom
+        chatBox.addEventListener('scroll', function () {
             userHasScrolled = chatBox.scrollHeight - chatBox.clientHeight - chatBox.scrollTop > 100;
         });
 
-        // Get last message ID to track new messages
-        let lastMessageId = {% if chat_messages.last %}{{ chat_messages.last.id }}{% else %}0{% endif %};
-
-        // Determine if current user is staff (for consistent sender name display)
-        const isUserStaff = {% if request.user.is_staff %}true{% else %}false{% endif %};
-        const currentUsername = "{{ request.user.username }}";
-
-        // Update chat messages
-        function updateChat(forceScroll = false) {
-            fetch("{% url 'chat:get_messages' thread.id %}")
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.messages || !data.messages.length) return;
-
-                    const chatBox = document.querySelector("#chat-box");
-                    const hasNewMessages = data.messages.length > 0 && data.messages[data.messages.length-1].id > lastMessageId;
-
-                    if (hasNewMessages || forceScroll) {
-                        // Update lastMessageId
-                        lastMessageId = data.messages[data.messages.length-1].id;
-
-                        // Update messages
-                        chatBox.innerHTML = '';
-
-                        data.messages.forEach(msg => {
-                            const isCurrentUser = msg.sender === currentUsername;
-
-                            // Determine sender display name based on user role
-                            let senderDisplayName;
-                            if (isUserStaff) {
-                                // For staff users, show real username
-                                senderDisplayName = msg.sender;
-                            } else {
-                                // For regular users, show "Admin" for non-user messages
-                                senderDisplayName = isCurrentUser ? msg.sender : "Admin";
-                            }
-
-                            // Create HTML string for better control over formatting
-                            const messageHTML = `
-                                <div class="message mb-2 ${isCurrentUser ? 'text-end' : ''}">
-                                    <div class="message-content ${isCurrentUser ? 'bg-primary text-white' : 'bg-secondary text-white'}">
-                                        <small class="d-block text-white-50">${senderDisplayName} - ${new Date(msg.timestamp).toLocaleString()}</small>
-                                        <span class="message-text">${msg.text}</span>
-                                    </div>
-                                </div>
-                            `;
-
-                            chatBox.insertAdjacentHTML('beforeend', messageHTML);
-                        });
-
-                        // Add scroll anchor
-                        const scrollAnchor = document.createElement('div');
-                        scrollAnchor.id = 'scroll-anchor';
-                        chatBox.appendChild(scrollAnchor);
-
-                        // Scroll to bottom only if user hasn't scrolled up or if it's a forced update
-                        if (forceScroll || !userHasScrolled) {
-                            chatBox.scrollTop = chatBox.scrollHeight;
-                        }
-                    }
-                })
-                .catch(error => console.error('Error fetching messages:', error));
+        function appendMessage(text, sender) {
+            const isCurrentUser = sender === currentUsername;
+            const senderDisplay = (!isUserStaff && !isCurrentUser) ? 'Admin' : sender;
+            const div = document.createElement('div');
+            div.className = `message mb-2 ${isCurrentUser ? 'text-end' : ''}`;
+            div.innerHTML = `
+                <div class="message-content ${isCurrentUser ? 'bg-primary text-white' : 'bg-secondary text-white'}">
+                    <small class="d-block text-white-50">${senderDisplay} - ${new Date().toLocaleString()}</small>
+                    <span class="message-text">${text}</span>
+                </div>
+            `;
+            chatBox.insertBefore(div, document.getElementById('scroll-anchor'));
+            if (!userHasScrolled) chatBox.scrollTop = chatBox.scrollHeight;
         }
 
-        // Check for new messages every 5 seconds
-        setInterval(updateChat, 5000);
+        const wsScheme = window.location.protocol === 'https:' ? 'wss' : 'ws';
+        const socket = new WebSocket(`${wsScheme}://${window.location.host}/ws/chat/{{ thread.id }}/`);
 
-        // Initial update
-        updateChat(true);
+        socket.onmessage = function (e) {
+            const data = JSON.parse(e.data);
+            if (data.sender === 'System') return;
+            appendMessage(data.message, data.sender);
+        };
+
+        socket.onclose = function () {
+            console.error('Chat WebSocket closed unexpectedly');
+        };
+
+        document.getElementById('chat-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const messageInput = document.getElementById('message-input');
+            const message = messageInput.value.trim();
+            if (!message) return;
+
+            fetch(this.action, {
+                method: 'POST',
+                body: new FormData(this),
+                headers: {'X-Requested-With': 'XMLHttpRequest'}
+            }).then(response => {
+                if (response.ok) messageInput.value = '';
+            }).catch(error => console.error('Error sending message:', error));
+        });
+
+        chatBox.scrollTop = chatBox.scrollHeight;
     </script>
 {% endblock content %}
