@@ -55,7 +55,7 @@ repos:
             )$
 
   - repo: https://github.com/djlint/djLint
-    rev: v1.44.1
+    rev: v1.44.2
     # A collection of git hooks for Django projects.
     hooks:
       - id: djlint-reformat-django

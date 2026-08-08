@@ -1,5 +1,5 @@
 # [stage__base]-[BEGIN]================================================
-FROM python:3.13.1-slim AS base
+FROM python:3.14.0-slim AS base
 
 ENV PYTHONUNBUFFERED=1
 
@@ -46,6 +46,16 @@ ENV UV_LINK_MODE=copy
 # Enable caching for faster builds
 # https://docs.astral.sh/uv/guides/integration/docker/#caching
 ENV UV_CACHE_DIR=/opt/uv-cache/
+# Build the environment outside WORKDIR. The dev compose bind-mounts the source
+# tree over /wd, so a venv inside it has to be masked by an extra volume — and a
+# masking volume created by an older image survives a Python upgrade and shadows
+# the new one. Keeping the venv out of /wd removes that whole failure mode.
+ENV UV_PROJECT_ENVIRONMENT=/opt/venv
+# Never let uv fetch its own interpreter. .python-version must match the base
+# image above; if it does not, uv would quietly build the venv against a
+# downloaded Python that the final stage never copies, producing an image whose
+# .venv/bin/python is a dangling symlink. Failing the build is the loud version.
+ENV UV_PYTHON_DOWNLOADS=never
 #
 RUN --mount=type=cache,target=/opt/uv-cache/ \
     --mount=type=bind,source=uv.lock,target=uv.lock \
@@ -60,9 +70,9 @@ FROM base AS final
 
 ARG USER=user
 ARG WORKDIR=/wd
-ARG VENV_DIR=${WORKDIR}/.venv
+ARG VENV_DIR=/opt/venv
 
-COPY --from=builder /wd/.venv ${VENV_DIR}
+COPY --from=builder ${VENV_DIR} ${VENV_DIR}
 
 COPY --chown=${USER} --chmod=555 docker/app/entrypoint.sh /entrypoint.sh
 COPY --chown=${USER} --chmod=555 docker/app/start.sh /start.sh
