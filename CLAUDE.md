@@ -18,7 +18,7 @@ Django PC Builder & E-Commerce Platform — portfolio project. Full-stack Django
 
 ```
 apps/
-  about/       — static about page
+  about/       — about page + contact form
   base/        — homepage
   blog/        — posts, categories, comments
   builder/     — PC components, builds, orders, progress tracker
@@ -35,15 +35,18 @@ core/
 ## Running the Project
 
 ```bash
-# Full Docker setup (build + migrate + start)
-just homework-i-docker-i-run
+# Full Docker setup (config + build + migrate + start) → http://localhost:8080
+just d-up
 
-# Tear down
-just homework-i-docker-i-purge
+# Tear down (containers, volumes, locally built images)
+just d-purge
 
 # See all commands
 just --list
 ```
+
+`just d-up` creates `.env` and `compose.override.yaml` from the committed
+examples if they are missing, so it works straight after a clone.
 
 ## Development Setup
 
@@ -58,14 +61,20 @@ just init-i-configs
 ## Running Tests
 
 ```bash
-# In Docker (recommended)
-just test-i-docker-run
+# Locally, no setup needed (recommended)
+just test-i-run
 
-# Locally (without Docker)
-.venv/bin/python manage.py test apps --settings=core.test_settings
+# With a per-file coverage report
+just test-i-coverage
+
+# Inside the running container
+just test-i-docker-run
 ```
 
-`core/test_settings.py` — test settings with SQLite in-memory and locmem email backend, no env vars needed.
+`core/test_settings.py` — test settings with SQLite in-memory, an in-memory
+channel layer, and a locmem email backend; no env vars needed.
+
+CI enforces a 90% coverage floor (currently at 99%).
 
 ## Key Architectural Notes
 
@@ -73,6 +82,8 @@ just test-i-docker-run
 - **Chat flow**: messages are sent via HTTP POST (`send_message` view) which saves to DB and broadcasts to the WebSocket channel layer group. All connected WS clients receive the message in real-time. The `get_messages` JSON endpoint exists for API access.
 - **Admin-only views**: `builder/` and chat `thread_list` require `is_staff=True`, enforced via `@user_passes_test(is_admin)`.
 - **Email**: all email functions use `fail_silently=True` — SMTP errors are logged but don't crash the request.
+- **No personal data in the repo**: the About page renders owner name/bio/socials from the `SITE_OWNER` settings dict (`SITE__OWNER_*` env vars), and every field is optional — a fresh clone shows only the project blurb and the contact form.
+- **Chat message escaping**: `ChatMessage.is_html` marks the few messages the app composes itself (order summaries, component tables, built with `format_html`). Those render unescaped; everything a user types must stay `is_html=False` or it becomes stored XSS.
 
 ## Code Conventions
 
