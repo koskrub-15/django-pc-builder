@@ -3,7 +3,9 @@ from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from django.contrib.auth.models import User
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.builder.models.pc_build import OrderProgress, PCBuild, PCBuildOrder, PCComponent
@@ -383,3 +385,47 @@ class ChatMessageEscapingTest(TestCase):
         )
         response = self.client.get(reverse("chat:chat_room", args=[self.thread.id]))
         self.assertIn("<b>Order #1</b>", response.content.decode())
+
+
+class ChatQueryCountTest(TestCase):
+    """Chat listings must not issue queries per message or per thread."""
+
+    def setUp(self) -> None:
+        self.staff = User.objects.create_user(username="staff", password="pass", is_staff=True)
+        self.owner = User.objects.create_user(username="owner", password="pass")
+        self.thread = ChatThread.objects.create(user=self.owner)
+        self.client.login(username="staff", password="pass")
+
+    def _queries_for(self, url: str) -> int:
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(url)
+        return len(ctx.captured_queries)
+
+    def test_chat_room_query_count_is_flat_in_messages(self) -> None:
+        url = reverse("chat:chat_room", args=[self.thread.id])
+        ChatMessage.objects.create(thread=self.thread, sender=self.owner, text="one")
+        baseline = self._queries_for(url)
+
+        for text in ("two", "three", "four"):
+            ChatMessage.objects.create(thread=self.thread, sender=self.staff, text=text)
+
+        self.assertEqual(self._queries_for(url), baseline)
+
+    def test_thread_list_query_count_is_flat_in_threads(self) -> None:
+        url = reverse("chat:thread_list")
+        baseline = self._queries_for(url)
+
+        for name in ("a", "b", "c"):
+            ChatThread.objects.create(user=User.objects.create_user(username=name, password="pass"))
+
+        self.assertEqual(self._queries_for(url), baseline)
+
+    def test_get_messages_query_count_is_flat_in_messages(self) -> None:
+        url = reverse("chat:get_messages", args=[self.thread.id])
+        ChatMessage.objects.create(thread=self.thread, sender=self.owner, text="one")
+        baseline = self._queries_for(url)
+
+        for text in ("two", "three", "four"):
+            ChatMessage.objects.create(thread=self.thread, sender=self.staff, text=text)
+
+        self.assertEqual(self._queries_for(url), baseline)

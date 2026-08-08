@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
+from django.db.models import Count, QuerySet
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_POST
@@ -10,8 +11,13 @@ from apps.blog.forms import CategoryForm, CommentForm, PostForm
 from apps.blog.models.posts import Category, Comment, Post
 
 
+def _post_list() -> QuerySet[Post]:
+    """Return posts with everything the card template renders, in one round trip."""
+    return Post.objects.prefetch_related("categories").annotate(comment_count=Count("comments", distinct=True))
+
+
 def index(request: HttpRequest) -> HttpResponse:
-    posts = Post.objects.all().order_by("-created_on")
+    posts = _post_list().order_by("-created_on")
     paginator = Paginator(posts, 4)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -30,7 +36,7 @@ def blog_category(request: HttpRequest, category: str) -> HttpResponse:
     # The links that reach this view are built from Category.name, so the match
     # is exact: __contains also pulled in every category the name is a substring
     # of, and listed a post once per matching category.
-    posts = Post.objects.filter(categories__name__iexact=category).order_by("-created_on").distinct()
+    posts = _post_list().filter(categories__name__iexact=category).order_by("-created_on").distinct()
     paginator = Paginator(posts, 4)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)

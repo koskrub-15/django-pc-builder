@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.blog.models.posts import Category, Comment, Post
@@ -264,3 +266,26 @@ class CategoryAdminViewsTest(TestCase):
     def test_delete_missing_category_returns_404(self) -> None:
         response = self.client.post(reverse("blog:delete_category", args=[99999]))
         self.assertEqual(response.status_code, 404)
+
+
+class BlogIndexQueryCountTest(TestCase):
+    """The post list must not issue queries per post."""
+
+    def _add_post(self, title: str) -> None:
+        post = Post.objects.create(title=title, body="x")
+        post.categories.add(Category.objects.create(name=f"cat-{title}"))
+        Comment.objects.create(author="a", body="b", post=post)
+
+    def _queries_for_index(self) -> int:
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(reverse("blog:index"))
+        return len(ctx.captured_queries)
+
+    def test_query_count_does_not_grow_with_the_number_of_posts(self) -> None:
+        self._add_post("one")
+        baseline = self._queries_for_index()
+
+        for title in ("two", "three", "four"):
+            self._add_post(title)
+
+        self.assertEqual(self._queries_for_index(), baseline)

@@ -39,7 +39,7 @@ def _parse_amount(raw: str | None) -> Decimal:
 @login_required
 def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
     thread = get_accessible_thread(request.user, thread_id)
-    chat_messages = ChatMessage.objects.filter(thread=thread).order_by("timestamp")
+    chat_messages = ChatMessage.objects.filter(thread=thread).select_related("sender").order_by("timestamp")
 
     context: dict[str, Any] = {
         "thread": thread,
@@ -47,7 +47,8 @@ def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
     }
 
     if request.user.is_staff:
-        context["builds"] = PCBuild.objects.all()
+        # total_price sums the components, so the picker needs them prefetched.
+        context["builds"] = PCBuild.objects.prefetch_related("components")
 
     return render(request, "chat/chat_room.html", context)
 
@@ -96,7 +97,7 @@ def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
     except ValueError:
         last_id = 0
 
-    messages_query = ChatMessage.objects.filter(thread=thread).order_by("timestamp")
+    messages_query = ChatMessage.objects.filter(thread=thread).select_related("sender").order_by("timestamp")
     if last_id > 0 and request.GET.get("only_new", "") == "true":
         messages_query = messages_query.filter(id__gt=last_id)
 
@@ -226,7 +227,7 @@ def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def thread_list(request: HttpRequest) -> HttpResponse:
-    threads = ChatThread.objects.all()
+    threads = ChatThread.objects.select_related("user")
     return render(request, "chat/thread_list.html", {"threads": threads})
 
 

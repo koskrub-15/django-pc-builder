@@ -12,7 +12,9 @@ from apps.chat.utils.send_mail import notify_user_about_order
 @login_required
 @user_passes_test(is_admin)
 def progress_tracker(request: HttpRequest) -> HttpResponse:
-    orders = PCBuildOrder.objects.select_related("progress").all()
+    orders = PCBuildOrder.objects.select_related("progress", "build", "customer").prefetch_related(
+        "build__components",
+    )
 
     if request.method == "POST":
         for order in orders:
