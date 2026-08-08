@@ -16,7 +16,6 @@ dependencies = [
     "gunicorn>=23.0.0",
     "pillow>=11.2.1",
     "psycopg[binary]>=3.2.9",
-    "uuid>=1.30",
 ]
 
 [tool.ruff]
@@ -60,6 +59,9 @@ extend-ignore = [
     "DJ012", # django-unordered-body-content-in-model
     #
     "CPY001", # Missing copyright notice. This is a portfolio project, not licensed code.
+    #
+    # Trailing commas: ruff-format owns them, and the rule fights the formatter.
+    "COM812",
 ]
 
 task-tags = [

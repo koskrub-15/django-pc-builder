@@ -219,7 +219,7 @@ apps/
   builder/     — components, builds, orders, progress tracker
   chat/        — real-time WebSocket chat (admin ↔ customer)
   profile/     — user order history
-  store/       — placeholder landing page
+  store/       — services, ordering steps and FAQ page
   templates/   — all HTML templates (shared across apps)
 core/
   settings.py       — main settings
