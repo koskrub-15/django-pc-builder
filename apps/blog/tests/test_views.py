@@ -95,6 +95,18 @@ class BlogCategoryViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["page_obj"].paginator.count, 0)
 
+    def test_partial_category_name_does_not_match(self) -> None:
+        response = self.client.get(reverse("blog:blog_category", args=["Hard"]))
+        self.assertEqual(response.context["page_obj"].paginator.count, 0)
+
+    def test_post_in_two_matching_categories_is_listed_once(self) -> None:
+        post = Post.objects.get(title="GPU Review")
+        post.categories.add(Category.objects.create(name="hardware"))
+
+        response = self.client.get(reverse("blog:blog_category", args=["Hardware"]))
+
+        self.assertEqual(response.context["page_obj"].paginator.count, 1)
+
 
 class BlogAdminViewsTest(TestCase):
     def setUp(self) -> None:

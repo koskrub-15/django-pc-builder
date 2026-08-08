@@ -27,9 +27,10 @@ def index(request: HttpRequest) -> HttpResponse:
 
 
 def blog_category(request: HttpRequest, category: str) -> HttpResponse:
-    posts = Post.objects.filter(
-        categories__name__contains=category,
-    ).order_by("-created_on")
+    # The links that reach this view are built from Category.name, so the match
+    # is exact: __contains also pulled in every category the name is a substring
+    # of, and listed a post once per matching category.
+    posts = Post.objects.filter(categories__name__iexact=category).order_by("-created_on").distinct()
     paginator = Paginator(posts, 4)
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
@@ -66,7 +67,7 @@ def blog_detail(request: HttpRequest, pk: int) -> HttpResponse:
         else:
             form = CommentForm()
 
-    comments = Comment.objects.filter(post=post)
+    comments = post.comments.all()
     context = {
         "post": post,
         "comments": comments,

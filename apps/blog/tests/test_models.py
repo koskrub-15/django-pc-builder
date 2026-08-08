@@ -35,3 +35,6 @@ class CommentModelTest(TestCase):
 
     def test_str(self) -> None:
         self.assertEqual(str(self.comment), "Alice on 'Post'")
+
+    def test_post_exposes_its_comments(self) -> None:
+        self.assertEqual(list(self.comment.post.comments.all()), [self.comment])
