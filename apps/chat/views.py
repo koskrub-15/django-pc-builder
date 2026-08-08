@@ -2,13 +2,15 @@ from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
 
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.html import format_html, format_html_join
 
 from apps.base.utils.is_admin import is_admin
 from apps.builder.models.pc_build import OrderProgress, PCBuild, PCBuildOrder
@@ -20,7 +22,6 @@ from .utils.send_mail import create_order, notify_admin_about_message
 @login_required
 def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
     thread = get_object_or_404(ChatThread, id=thread_id)
-
     chat_messages = ChatMessage.objects.filter(thread=thread).order_by("timestamp")
 
     context: dict[str, Any] = {
@@ -36,27 +37,24 @@ def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
 
 @login_required
 def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
-    """Send a new message in the chat via HTTP POST."""
     if request.method == "POST":
         thread = get_object_or_404(ChatThread, id=thread_id)
         message_text = request.POST.get("message", "").strip()
 
         if message_text:
-            last_message = (
-                ChatMessage.objects.filter(
-                    thread=thread,
-                    sender=request.user,
-                )
-                .order_by("-timestamp")
-                .first()
-            )
+            last_message = ChatMessage.objects.filter(thread=thread, sender=request.user).order_by("-timestamp").first()
 
-            time_limit = timedelta(hours=1)
-            notify_admin = not last_message or (timezone.now() - last_message.timestamp > time_limit)
-            ChatMessage.objects.create(
-                thread=thread,
-                sender=request.user,
-                text=message_text,
+            notify_admin = not last_message or (timezone.now() - last_message.timestamp > timedelta(hours=1))
+            ChatMessage.objects.create(thread=thread, sender=request.user, text=message_text)
+
+            async_to_sync(get_channel_layer().group_send)(
+                f"chat_{thread_id}",
+                {
+                    "type": "chat_message",
+                    "message": message_text,
+                    "sender": request.user.username,
+                    "is_html": False,
+                },
             )
 
             if notify_admin and not request.user.is_staff:
@@ -66,12 +64,13 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
                     user_message=message_text,
                 )
 
+    if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        return HttpResponse(status=204)
     return redirect("chat:chat_room", thread_id=thread_id)
 
 
 @login_required
 def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
-    """Get all messages for a thread in JSON format."""
     thread = get_object_or_404(ChatThread, id=thread_id)
 
     if not request.user.is_staff and request.user != thread.user:
@@ -84,7 +83,6 @@ def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
         last_id = 0
 
     messages_query = ChatMessage.objects.filter(thread=thread).order_by("timestamp")
-
     if last_id > 0 and request.GET.get("only_new", "") == "true":
         messages_query = messages_query.filter(id__gt=last_id)
 
@@ -111,7 +109,6 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
         return redirect("chat:chat_room", thread_id=thread.id)
 
     customer = thread.user
-
     build_id = request.POST.get("build_id")
     address = request.POST.get("address", "").strip()
     markup = request.POST.get("markup", "0").strip()
@@ -134,24 +131,33 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
         OrderProgress.objects.create(order=order)
         create_order(user_email=customer.email, username=customer.username, order=order)
 
-        components_html = (
-            '<table class="table table-bordered table-sm mb-0" style="background:white;">'
-            "<thead><tr><th>#</th><th>Component</th></tr></thead><tbody>"
+        rows = format_html_join(
+            "",
+            "<tr><td>{}</td><td>{}</td></tr>",
+            ((idx, component.name) for idx, component in enumerate(build.components.all(), 1)),
         )
-        for idx, component in enumerate(build.components.all(), 1):
-            components_html += f"<tr><td>{idx}</td><td>{component.name}</td></tr>"
-        components_html += "</tbody></table>"
+        components_html = format_html(
+            '<table class="table table-bordered table-sm mb-0" style="background:white;">'
+            "<thead><tr><th>#</th><th>Component</th></tr></thead><tbody>{}</tbody></table>",
+            rows,
+        )
 
         ChatMessage.objects.create(
             thread=thread,
             sender=request.user,
-            text=(
-                f"A new PC build order has been created for you: '<b>{build.name}</b>'.<br>"
-                f"Order number: <b>{order.id}</b><br>"
-                f"Order address: <b>{order.address}</b><br>"
-                f"Total price: <b>{order.total_price:.2f} €</b><br>"
-                f"We'll keep you updated on your order status via chat and email.<br>"
-                f"Components:<br><br>{components_html}"
+            is_html=True,
+            text=format_html(
+                "A new PC build order has been created for you: '<b>{}</b>'.<br>"
+                "Order number: <b>{}</b><br>"
+                "Order address: <b>{}</b><br>"
+                "Total price: <b>{} €</b><br>"
+                "We'll keep you updated on your order status via chat and email.<br>"
+                "Components:<br><br>{}",
+                build.name,
+                order.id,
+                order.address,
+                f"{order.total_price:.2f}",
+                components_html,
             ),
         )
 
@@ -165,7 +171,6 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
 @login_required
 @transaction.atomic
 def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
-    """Send a component list with a service fee without creating an order."""
     thread = get_object_or_404(ChatThread, id=thread_id)
 
     if not request.user.is_staff:
@@ -184,24 +189,33 @@ def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
             except (InvalidOperation, TypeError):
                 service_fee_decimal = Decimal("0.00")
 
-            components_html = (
-                '<table class="table table-bordered table-sm mb-0" style="background:white;">'
-                "<thead><tr><th>#</th><th>Component</th><th>Price (€)</th></tr></thead><tbody>"
+            rows = format_html_join(
+                "",
+                "<tr><td>{}</td><td>{}</td><td>{}</td></tr>",
+                (
+                    (idx, component.name, f"{component.price:.2f}")
+                    for idx, component in enumerate(build.components.all(), 1)
+                ),
             )
-
-            for idx, component in enumerate(build.components.all(), 1):
-                components_html += f"<tr><td>{idx}</td><td>{component.name}</td><td>{component.price:.2f}</td></tr>"
-
-            components_html += "</tbody></table>"
+            components_html = format_html(
+                '<table class="table table-bordered table-sm mb-0" style="background:white;">'
+                "<thead><tr><th>#</th><th>Component</th><th>Price (€)</th></tr></thead><tbody>{}</tbody></table>",
+                rows,
+            )
 
             ChatMessage.objects.create(
                 thread=thread,
                 sender=request.user,
-                text=(
-                    f"Here's the component list for '<b>{build.name}</b>':<br><br>"
-                    f"Build total price: <b>{build.total_price:.2f} €</b><br>"
-                    f"Service fee: <b>{service_fee_decimal:.2f} €</b><br>"
-                    f"Components breakdown:<br><br>{components_html}<br>"
+                is_html=True,
+                text=format_html(
+                    "Here's the component list for '<b>{}</b>':<br><br>"
+                    "Build total price: <b>{} €</b><br>"
+                    "Service fee: <b>{} €</b><br>"
+                    "Components breakdown:<br><br>{}<br>",
+                    build.name,
+                    f"{build.total_price:.2f}",
+                    f"{service_fee_decimal:.2f}",
+                    components_html,
                 ),
             )
 
@@ -220,14 +234,7 @@ def thread_list(request: HttpRequest) -> HttpResponse:
     return render(request, "chat/thread_list.html", {"threads": threads})
 
 
-def get_or_create_thread_with_admin(user: User) -> ChatThread:
-    thread = ChatThread.objects.filter(user=user).first()
-    if not thread:
-        thread = ChatThread.objects.create(user=user)
-    return thread
-
-
 @login_required
 def contact_admin(request: HttpRequest) -> HttpResponse:
-    thread = get_or_create_thread_with_admin(request.user)
+    thread, _ = ChatThread.objects.get_or_create(user=request.user)
     return redirect("chat:chat_room", thread_id=thread.id)

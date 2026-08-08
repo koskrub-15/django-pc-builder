@@ -12,8 +12,5 @@ set -o nounset
 set -o xtrace
 # [bash_init]-[END]
 
-#
-#python manage.py makemigrations
-#python manage.py migrate
-
-#python manage.py chats generate --amount 7 --initial
+# Migrations are committed to the repo, so only apply them here — never generate.
+python manage.py migrate --noinput

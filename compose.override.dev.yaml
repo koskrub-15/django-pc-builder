@@ -7,10 +7,11 @@ services:
       DEBUG: "True"
       DJANGO_SETTINGS_MODULE: "core.settings"
       PYTHONDONTWRITEBYTECODE: "1"
+    # staticfiles/ and media/ deliberately stay on the named volumes declared in
+    # compose.yaml — nginx mounts those same volumes to serve the files. Binding
+    # the host directories here instead would leave nginx serving empty volumes.
     volumes: &app_volumes
       - ./:/wd/
-      - ./staticfiles:/wd/staticfiles
-      - ./media:/wd/media
       - /wd/.venv/
       - /wd/__pycache__/
     develop:
@@ -68,7 +69,7 @@ services:
 
   nginx:
     ports:
-      - "60000:80"
+      - "8080:80"
 
   init:
     user: ${USER_ID:-1000}
@@ -82,4 +83,4 @@ services:
 
   redis:
     ports:
-      - "6380:6380"
+      - "6380:6379"

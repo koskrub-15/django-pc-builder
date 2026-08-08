@@ -172,7 +172,7 @@ cython_debug/
 #.idea/
 
 
-.idea/git_toolbox_prj.xml
+.idea/
 
 compose.override.yaml
 staticfiles/**

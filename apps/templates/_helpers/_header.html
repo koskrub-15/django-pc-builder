@@ -61,7 +61,11 @@
                             <a class="nav-link" href="{% url 'profile:index' %}">Profile</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="{% url 'account_logout' %}">Logout</a>
+                            {# POST-only on purpose: logging out over GET lets any page log the user out. #}
+                            <form method="post" action="{% url 'account_logout' %}" class="d-inline">
+                                {% csrf_token %}
+                                <button type="submit" class="nav-link btn btn-link">Logout</button>
+                            </form>
                         </li>
                     {% else %}
                         <li class="nav-item">

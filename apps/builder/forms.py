@@ -1,7 +1,6 @@
 from typing import ClassVar
 
 from django import forms
-from django.forms import modelformset_factory
 
 from apps.builder.models.pc_build import PCBuild, PCComponent
 
@@ -31,6 +30,3 @@ class PCComponentForm(forms.ModelForm):
             "price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "link": forms.URLInput(attrs={"class": "form-control"}),
         }
-
-
-ComponentFormSet = modelformset_factory(PCComponent, form=PCComponentForm, extra=1)
