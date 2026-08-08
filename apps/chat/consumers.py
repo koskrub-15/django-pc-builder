@@ -59,6 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     "type": "chat_message",
                     "message": message,
                     "sender": sender.username,
+                    "is_html": False,
                 },
             )
         except (json.JSONDecodeError, KeyError) as e:
@@ -98,6 +99,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 {
                     "message": event["message"],
                     "sender": event["sender"],
+                    "is_html": event.get("is_html", False),
                 },
             ),
         )

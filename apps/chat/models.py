@@ -15,5 +15,10 @@ class ChatMessage(models.Model):
     text = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
+    # Whether "text" holds markup the application composed itself (order
+    # summaries, component tables). Only these are rendered unescaped — anything
+    # typed by a user must stay False or it becomes a stored-XSS vector.
+    is_html = models.BooleanField(default=False)
+
     def __str__(self) -> str:
         return f"Message from {self.sender.username} at {self.timestamp}"

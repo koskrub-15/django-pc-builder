@@ -10,6 +10,7 @@ from django.db import transaction
 from django.http import HttpRequest, HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.utils.html import format_html, format_html_join
 
 from apps.base.utils.is_admin import is_admin
 from apps.builder.models.pc_build import OrderProgress, PCBuild, PCBuildOrder
@@ -41,11 +42,7 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
         message_text = request.POST.get("message", "").strip()
 
         if message_text:
-            last_message = (
-                ChatMessage.objects.filter(thread=thread, sender=request.user)
-                .order_by("-timestamp")
-                .first()
-            )
+            last_message = ChatMessage.objects.filter(thread=thread, sender=request.user).order_by("-timestamp").first()
 
             notify_admin = not last_message or (timezone.now() - last_message.timestamp > timedelta(hours=1))
             ChatMessage.objects.create(thread=thread, sender=request.user, text=message_text)
@@ -56,6 +53,7 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
                     "type": "chat_message",
                     "message": message_text,
                     "sender": request.user.username,
+                    "is_html": False,
                 },
             )
 
@@ -133,24 +131,33 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
         OrderProgress.objects.create(order=order)
         create_order(user_email=customer.email, username=customer.username, order=order)
 
-        components_html = (
-            '<table class="table table-bordered table-sm mb-0" style="background:white;">'
-            "<thead><tr><th>#</th><th>Component</th></tr></thead><tbody>"
+        rows = format_html_join(
+            "",
+            "<tr><td>{}</td><td>{}</td></tr>",
+            ((idx, component.name) for idx, component in enumerate(build.components.all(), 1)),
         )
-        for idx, component in enumerate(build.components.all(), 1):
-            components_html += f"<tr><td>{idx}</td><td>{component.name}</td></tr>"
-        components_html += "</tbody></table>"
+        components_html = format_html(
+            '<table class="table table-bordered table-sm mb-0" style="background:white;">'
+            "<thead><tr><th>#</th><th>Component</th></tr></thead><tbody>{}</tbody></table>",
+            rows,
+        )
 
         ChatMessage.objects.create(
             thread=thread,
             sender=request.user,
-            text=(
-                f"A new PC build order has been created for you: '<b>{build.name}</b>'.<br>"
-                f"Order number: <b>{order.id}</b><br>"
-                f"Order address: <b>{order.address}</b><br>"
-                f"Total price: <b>{order.total_price:.2f} €</b><br>"
-                f"We'll keep you updated on your order status via chat and email.<br>"
-                f"Components:<br><br>{components_html}"
+            is_html=True,
+            text=format_html(
+                "A new PC build order has been created for you: '<b>{}</b>'.<br>"
+                "Order number: <b>{}</b><br>"
+                "Order address: <b>{}</b><br>"
+                "Total price: <b>{} €</b><br>"
+                "We'll keep you updated on your order status via chat and email.<br>"
+                "Components:<br><br>{}",
+                build.name,
+                order.id,
+                order.address,
+                f"{order.total_price:.2f}",
+                components_html,
             ),
         )
 
@@ -182,22 +189,33 @@ def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
             except (InvalidOperation, TypeError):
                 service_fee_decimal = Decimal("0.00")
 
-            components_html = (
-                '<table class="table table-bordered table-sm mb-0" style="background:white;">'
-                "<thead><tr><th>#</th><th>Component</th><th>Price (€)</th></tr></thead><tbody>"
+            rows = format_html_join(
+                "",
+                "<tr><td>{}</td><td>{}</td><td>{}</td></tr>",
+                (
+                    (idx, component.name, f"{component.price:.2f}")
+                    for idx, component in enumerate(build.components.all(), 1)
+                ),
             )
-            for idx, component in enumerate(build.components.all(), 1):
-                components_html += f"<tr><td>{idx}</td><td>{component.name}</td><td>{component.price:.2f}</td></tr>"
-            components_html += "</tbody></table>"
+            components_html = format_html(
+                '<table class="table table-bordered table-sm mb-0" style="background:white;">'
+                "<thead><tr><th>#</th><th>Component</th><th>Price (€)</th></tr></thead><tbody>{}</tbody></table>",
+                rows,
+            )
 
             ChatMessage.objects.create(
                 thread=thread,
                 sender=request.user,
-                text=(
-                    f"Here's the component list for '<b>{build.name}</b>':<br><br>"
-                    f"Build total price: <b>{build.total_price:.2f} €</b><br>"
-                    f"Service fee: <b>{service_fee_decimal:.2f} €</b><br>"
-                    f"Components breakdown:<br><br>{components_html}<br>"
+                is_html=True,
+                text=format_html(
+                    "Here's the component list for '<b>{}</b>':<br><br>"
+                    "Build total price: <b>{} €</b><br>"
+                    "Service fee: <b>{} €</b><br>"
+                    "Components breakdown:<br><br>{}<br>",
+                    build.name,
+                    f"{build.total_price:.2f}",
+                    f"{service_fee_decimal:.2f}",
+                    components_html,
                 ),
             )
 
