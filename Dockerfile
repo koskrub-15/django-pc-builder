@@ -16,10 +16,19 @@ RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
 # [update_and_pre_install]-[END]
 
 ARG USER=user
+# Must match the host uid: compose runs the app with "user: ${USER_ID}" so that
+# files written into the bind-mounted source tree stay owned by the host user.
+ARG USER_ID=1000
 
 WORKDIR ${WORKDIR}
 
-RUN useradd --system ${USER} &&\
+# staticfiles/ and media/ are created here so the named volumes mounted over them
+# inherit the app user's ownership — an empty volume would be root-owned and
+# collectstatic (running as USER_ID) could not write to it.
+# --create-home: gunicorn's control server writes under $HOME and logs an error
+# on every boot if the directory does not exist.
+RUN useradd --system --uid ${USER_ID} --create-home ${USER} &&\
+    mkdir --parents ${WORKDIR}/staticfiles ${WORKDIR}/media &&\
     chown --recursive ${USER} ${WORKDIR}
 # [stage__base]-[END]================================================
 

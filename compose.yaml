@@ -7,13 +7,19 @@ x-app: &app
   build:
     context: .
     dockerfile: Dockerfile
+    args:
+      USER_ID: ${USER_ID:-1000}
 
   env_file:
     - .env
 
+  # Inside the compose network the services are reachable by name on their
+  # container ports, overriding whatever host/port .env uses for local runs.
   environment:
     POSTGRES_HOST: postgres
     POSTGRES_PORT: 5432
+    REDIS_HOST: redis
+    REDIS_PORT: 6379
 
 services:
   app-wsgi:
@@ -46,12 +52,11 @@ services:
     profiles:
       - full_dev
 
-
   nginx:
     image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
+    # No host ports here on purpose: compose concatenates "ports" across files, so
+    # publishing here would leave the override binding 80, 443 *and* its own port.
+    # Each override picks the host port it wants (dev uses 8080).
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
