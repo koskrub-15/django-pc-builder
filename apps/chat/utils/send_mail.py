@@ -44,8 +44,7 @@ def create_order(user_email: str, username: str, order: PCBuildOrder) -> None:
         "order": order,
         "subject": subject,
         "message": (
-            "We've created a PC build order for you. "
-            "We'll keep you updated on your order status via chat and email."
+            "We've created a PC build order for you. We'll keep you updated on your order status via chat and email."
         ),
     }
     html_content = render_to_string("email/order_message.html", context)

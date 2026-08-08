@@ -30,5 +30,3 @@ class PCComponentForm(forms.ModelForm):
             "price": forms.NumberInput(attrs={"class": "form-control", "step": "0.01"}),
             "link": forms.URLInput(attrs={"class": "form-control"}),
         }
-
-

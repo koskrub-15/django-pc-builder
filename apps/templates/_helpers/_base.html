@@ -1,7 +1,9 @@
 {% extends "_helpers/_base_root.html" %}
 {% load static %}
 {% block html %}
+    {# djlint:off H007 — the doctype is in _base_root.html, which this template only fills a block of. #}
     <html lang="en">
+        {# djlint:on #}
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -41,7 +43,6 @@
                     <h1>Hello, World!</h1>
                 {% endblock content %}
             </div>
-            {#            {% include "_helpers/_footer.html" %}#}
         </body>
     </html>
 {% endblock html %}
