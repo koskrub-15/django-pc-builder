@@ -1,0 +1,27 @@
+{% extends "_helpers/_base.html" %}
+{% block title %}
+    {% block error_title %}
+    {% endblock error_title %}
+    | PC Builder
+{% endblock title %}
+{% block content %}
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-7 text-center">
+                <p class="display-1 fw-bold text-secondary mb-0">
+                    {% block error_code %}
+                    {% endblock error_code %}
+                </p>
+                <h1 class="h3 mb-3">
+                    {% block error_heading %}
+                    {% endblock error_heading %}
+                </h1>
+                <p class="text-muted mb-4">
+                    {% block error_body %}
+                    {% endblock error_body %}
+                </p>
+                <a href="{% url 'base:index' %}" class="btn btn-primary">Back to the homepage</a>
+            </div>
+        </div>
+    </div>
+{% endblock content %}
