@@ -6,6 +6,18 @@ from django.test import TestCase
 from apps.builder.models.pc_build import OrderProgress, PCBuild, PCBuildOrder, PCComponent
 
 
+class PCComponentTest(TestCase):
+    def test_str_is_the_component_name(self) -> None:
+        component = PCComponent.objects.create(name="RTX 5090", price=Decimal("1999.00"))
+        self.assertEqual(str(component), "RTX 5090")
+
+    def test_components_are_ordered_by_price_then_name(self) -> None:
+        PCComponent.objects.create(name="GPU", price=Decimal("500.00"))
+        PCComponent.objects.create(name="CPU", price=Decimal("300.00"))
+        PCComponent.objects.create(name="AIO", price=Decimal("300.00"))
+        self.assertEqual([c.name for c in PCComponent.objects.all()], ["AIO", "CPU", "GPU"])
+
+
 class PCBuildTotalPriceTest(TestCase):
     def test_total_price_with_no_components(self) -> None:
         build = PCBuild.objects.create(name="Empty Build")
