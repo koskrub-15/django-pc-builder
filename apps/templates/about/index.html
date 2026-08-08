@@ -1,7 +1,7 @@
 {% extends "_helpers/_base.html" %}
 {% load static %}
 {% block title %}
-    About me
+    About
 {% endblock title %}
 {% block content %}
     <div class="container py-5">
@@ -9,71 +9,106 @@
             <div class="col-lg-8">
                 <div class="card mb-4 border-2">
                     <div class="card-body">
-                        <h1 class="card-title">About me</h1>
-                    </div>
-                </div>
-                <div class="card mb-4 border-2">
-                    <div class="card-body">
-                        <h4 class="card-title mb-4">
-                            <strong>Kostiantyn</strong>
-                        </h4>
-                        <h6 class="card-subtitle mb-3 text-muted">Python Backend Developer</h6>
-                        <p class="card-text">
-                            Building scalable backend systems with Python and modern frameworks. Hands-on experience with production-ready APIs, database integration, and Docker-based environments.
-                        </p>
-                        <p class="card-text">
-                            <strong>Languages & Tools:</strong>
-                        </p>
-                        <ul class="mb-4">
-                            <li>Python (Flask, FastAPI, Django)</li>
-                            <li>PostgreSQL, SQLAlchemy, Celery</li>
-                            <li>Docker, Git, Nginx, WebSocket</li>
-                        </ul>
-                        <p class="card-text">
-                            <strong>Skills:</strong>
-                            <br>
-                            <strong>REST APIs</strong> design, async programming, <strong>database</strong> modeling, deployment with <strong>Docker</strong>, frontend basics (HTML/CSS).
-                        </p>
-                        <p class="card-text">
-                            Based in <strong>Germany</strong>, originally from <strong>Ukraine</strong>. Currently learning <strong>German</strong> and improving <strong>full-stack</strong> skills.
+                        <h1 class="card-title">About</h1>
+                        <p class="card-text mb-0">
+                            A custom PC building service: browse pre-configured builds, talk to a
+                            specialist in a live chat, and follow your order from ordered parts all
+                            the way to delivery.
                         </p>
                     </div>
                 </div>
-                <div class="card mb-4 border-info">
-                    <div class="card-body ">
-                        <h2 class="card-title">Contact</h2>
-                        <div class="d-flex justify-content">
-                            {#                            here will be links to social networks with icons#}
-                            {#                            icons there apps/static/img/{service_name}.svg#}
-                            <a href="https://github.com/koskrub-15"
-                               class="btn btn-light"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <img src="{% static 'app/img/github.svg' %}" class="img-link" alt="GitHub">
-                            </a>
-                            <a href="https://t.me/koskrub15"
-                               class="btn btn-light"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <img src="{% static 'app/img/telegram.svg' %}"
-                                     class="img-link"
-                                     alt="Telegram">
-                            </a>
-                            <a href="https://www.linkedin.com/in/koskrub-15"
-                               class="btn btn-light"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <img src="{% static 'app/img/LinkedIn.svg' %}"
-                                     class="img-link"
-                                     alt="LinkedIN">
-                            </a>
-                            <a href="mailto:kostyan.krutyak15@gmail.com"
-                               class="btn btn-light"
-                               target="_blank"
-                               rel="noopener noreferrer">
-                                <img src="{% static 'app/img/gmail.svg' %}" class="img-link" alt="Gmail">
-                            </a>
+                {# Everything below comes from SITE_OWNER settings, so a fresh deployment shows nothing until it is filled in. #}
+                {% if owner.name or owner.bio %}
+                    <div class="card mb-4 border-2">
+                        <div class="card-body">
+                            {% if owner.name %}
+                                <h4 class="card-title mb-4">
+                                    <strong>{{ owner.name }}</strong>
+                                </h4>
+                            {% endif %}
+                            {% if owner.role %}<h6 class="card-subtitle mb-3 text-muted">{{ owner.role }}</h6>{% endif %}
+                            {% if owner.bio %}<p class="card-text mb-0">{{ owner.bio }}</p>{% endif %}
                         </div>
+                    </div>
+                {% endif %}
+                {% if owner.github or owner.telegram or owner.linkedin or owner.email %}
+                    <div class="card mb-4 border-info">
+                        <div class="card-body">
+                            <h2 class="card-title">Elsewhere</h2>
+                            <div class="d-flex justify-content">
+                                {% if owner.github %}
+                                    <a href="{{ owner.github }}"
+                                       class="btn btn-light"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        <img src="{% static 'app/img/github.svg' %}" class="img-link" alt="GitHub">
+                                    </a>
+                                {% endif %}
+                                {% if owner.telegram %}
+                                    <a href="{{ owner.telegram }}"
+                                       class="btn btn-light"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        <img src="{% static 'app/img/telegram.svg' %}"
+                                             class="img-link"
+                                             alt="Telegram">
+                                    </a>
+                                {% endif %}
+                                {% if owner.linkedin %}
+                                    <a href="{{ owner.linkedin }}"
+                                       class="btn btn-light"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        <img src="{% static 'app/img/LinkedIn.svg' %}"
+                                             class="img-link"
+                                             alt="LinkedIn">
+                                    </a>
+                                {% endif %}
+                                {% if owner.email %}
+                                    <a href="mailto:{{ owner.email }}"
+                                       class="btn btn-light"
+                                       target="_blank"
+                                       rel="noopener noreferrer">
+                                        <img src="{% static 'app/img/gmail.svg' %}" class="img-link" alt="Email">
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+                <div class="card mb-4 border-info">
+                    <div class="card-body">
+                        <h2 class="card-title mb-3">Get in touch</h2>
+                        <p class="card-text text-muted">Leave your details and we'll get back to you by email.</p>
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="alert {% if message.tags == 'success' %}alert-success{% else %}alert-danger{% endif %}"
+                                     role="alert">{{ message }}</div>
+                            {% endfor %}
+                        {% endif %}
+                        <form method="post" novalidate>
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="{{ form.name.id_for_label }}" class="form-label">Name</label>
+                                {{ form.name }}
+                                {% if form.name.errors %}<div class="text-danger small mt-1">{{ form.name.errors.0 }}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.email.id_for_label }}" class="form-label">Email</label>
+                                {{ form.email }}
+                                {% if form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ form.email.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ form.message.id_for_label }}" class="form-label">Message</label>
+                                {{ form.message }}
+                                {% if form.message.errors %}
+                                    <div class="text-danger small mt-1">{{ form.message.errors.0 }}</div>
+                                {% endif %}
+                            </div>
+                            <button type="submit" class="btn btn-primary">Send message</button>
+                        </form>
                     </div>
                 </div>
             </div>
