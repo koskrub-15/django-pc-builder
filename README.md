@@ -31,7 +31,7 @@ gets an email at each milestone.
 
 ### 🛠️ Tech Stack
 
-- **Framework**: [Django 5.2](https://www.djangoproject.com/)
+- **Framework**: [Django 5.2 LTS](https://www.djangoproject.com/) on Python 3.14
 - **WebSockets**: [Django Channels](https://channels.readthedocs.io/) + Daphne
 - **Database**: PostgreSQL · **Channel layer**: Redis
 - **Auth**: [django-allauth](https://allauth.org/)
