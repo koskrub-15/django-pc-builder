@@ -1,6 +1,6 @@
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpRequest, HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from apps.base.utils.is_admin import is_admin
@@ -79,7 +79,7 @@ def list_of_pc_builds(request: HttpRequest) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def update_build(request: HttpRequest, pk: int) -> HttpResponse:
-    build = PCBuild.objects.get(pk=pk)
+    build = get_object_or_404(PCBuild, pk=pk)
     if request.method == "POST":
         form = PCBuildForm(request.POST, instance=build)
         if form.is_valid():
@@ -115,7 +115,7 @@ def create_component(request: HttpRequest) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def edit_component(request: HttpRequest, pk: int) -> HttpResponse:
-    component = PCComponent.objects.get(pk=pk)
+    component = get_object_or_404(PCComponent, pk=pk)
     if request.method == "POST":
         form = PCComponentForm(request.POST, instance=component)
         if form.is_valid():

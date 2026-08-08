@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, render
+from django.views.decorators.http import require_POST
 
 from apps.base.utils.is_admin import is_admin
 from apps.blog.forms import CategoryForm, CommentForm, PostForm
@@ -91,16 +92,18 @@ def create_post(request: HttpRequest) -> HttpResponse:
 
 @login_required
 @user_passes_test(is_admin)
-def delete_post(request: HttpRequest, pk: int) -> HttpResponse:  # noqa: ARG001
-    post = Post.objects.get(pk=pk)
+@require_POST
+def delete_post(request: HttpRequest, pk: int) -> HttpResponse:
+    post = get_object_or_404(Post, pk=pk)
     post.delete()
-    return HttpResponseRedirect("/")
+    messages.success(request, "Post deleted successfully!")
+    return HttpResponseRedirect("/blog/")
 
 
 @login_required
 @user_passes_test(is_admin)
 def update_post(request: HttpRequest, pk: int) -> HttpResponse:
-    post = Post.objects.get(pk=pk)
+    post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES, instance=post)
         if form.is_valid():
@@ -161,6 +164,7 @@ def update_category(request: HttpRequest, pk: int) -> HttpResponse:
 
 @login_required
 @user_passes_test(is_admin)
+@require_POST
 def delete_category(request: HttpRequest, pk: int) -> HttpResponse:
     category = get_object_or_404(Category, pk=pk)
     category.delete()

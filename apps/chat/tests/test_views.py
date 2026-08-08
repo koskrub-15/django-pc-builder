@@ -268,10 +268,26 @@ class CreateOrderFromChatTest(TestCase):
         self.assertIn("RTX 5090", message.text)
 
     @patch("apps.chat.views.create_order")
-    def test_unknown_build_returns_404(self, _mock_create_order: Mock) -> None:
+    def test_unknown_build_reports_an_error_in_the_chat_room(self, _mock_create_order: Mock) -> None:
         self.client.login(username="staff", password="pass")
-        response = self.client.post(self.url, {"build_id": "99999"})
-        self.assertEqual(response.status_code, 404)
+        response = self.client.post(self.url, {"build_id": "99999"}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Selected PC build does not exist")
+        self.assertEqual(PCBuildOrder.objects.count(), 0)
+
+    @patch("apps.chat.views.create_order")
+    def test_non_numeric_build_id_reports_an_error(self, _mock_create_order: Mock) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.post(self.url, {"build_id": "abc"}, follow=True)
+
+        self.assertContains(response, "Selected PC build does not exist")
+        self.assertEqual(PCBuildOrder.objects.count(), 0)
+
+    def test_get_request_is_rejected(self) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
         self.assertEqual(PCBuildOrder.objects.count(), 0)
 
 
@@ -305,16 +321,18 @@ class SendComponentListTest(TestCase):
         self.client.post(self.url, {"build_id": str(self.build.id), "service_fee": "free"})
         self.assertIn("Service fee: <b>0.00", ChatMessage.objects.get(thread=self.thread).text)
 
-    def test_get_request_sends_nothing(self) -> None:
+    def test_get_request_is_rejected(self) -> None:
         self.client.login(username="staff", password="pass")
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse("chat:chat_room", args=[self.thread.id]))
+        self.assertEqual(response.status_code, 405)
         self.assertEqual(ChatMessage.objects.count(), 0)
 
-    def test_unknown_build_returns_404(self) -> None:
+    def test_unknown_build_reports_an_error_in_the_chat_room(self) -> None:
         self.client.login(username="staff", password="pass")
-        response = self.client.post(self.url, {"build_id": "99999"})
-        self.assertEqual(response.status_code, 404)
+        response = self.client.post(self.url, {"build_id": "99999"}, follow=True)
+
+        self.assertContains(response, "Selected PC build does not exist")
+        self.assertEqual(ChatMessage.objects.count(), 0)
 
     def test_component_names_are_escaped_in_the_generated_table(self) -> None:
         self.build.components.add(PCComponent.objects.create(name="<script>x</script>", price=Decimal("1.00")))

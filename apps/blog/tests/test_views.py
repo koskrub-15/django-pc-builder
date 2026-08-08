@@ -118,8 +118,21 @@ class BlogAdminViewsTest(TestCase):
     def test_delete_post_removes_post(self) -> None:
         self.client.login(username="staff", password="pass")
         post = Post.objects.create(title="To Delete", body="x")
-        self.client.get(reverse("blog:delete_post", args=[post.pk]))
+        response = self.client.post(reverse("blog:delete_post", args=[post.pk]))
+        self.assertRedirects(response, "/blog/")
         self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+
+    def test_delete_post_rejects_get(self) -> None:
+        self.client.login(username="staff", password="pass")
+        post = Post.objects.create(title="Survivor", body="x")
+        response = self.client.get(reverse("blog:delete_post", args=[post.pk]))
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Post.objects.filter(pk=post.pk).exists())
+
+    def test_delete_missing_post_returns_404(self) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.post(reverse("blog:delete_post", args=[99999]))
+        self.assertEqual(response.status_code, 404)
 
 
 class CreatePostViewTest(TestCase):
@@ -226,10 +239,16 @@ class CategoryAdminViewsTest(TestCase):
 
     def test_delete_category_removes_it(self) -> None:
         category = Category.objects.create(name="Doomed")
-        response = self.client.get(reverse("blog:delete_category", args=[category.pk]))
+        response = self.client.post(reverse("blog:delete_category", args=[category.pk]))
         self.assertRedirects(response, "/blog/categories/")
         self.assertFalse(Category.objects.filter(pk=category.pk).exists())
 
+    def test_delete_category_rejects_get(self) -> None:
+        category = Category.objects.create(name="Doomed")
+        response = self.client.get(reverse("blog:delete_category", args=[category.pk]))
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Category.objects.filter(pk=category.pk).exists())
+
     def test_delete_missing_category_returns_404(self) -> None:
-        response = self.client.get(reverse("blog:delete_category", args=[99999]))
+        response = self.client.post(reverse("blog:delete_category", args=[99999]))
         self.assertEqual(response.status_code, 404)
