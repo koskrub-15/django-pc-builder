@@ -8,7 +8,7 @@ from django.contrib.auth.models import AnonymousUser, User
 from django.test import TestCase
 
 from apps.chat import routing
-from apps.chat.consumers import ChatConsumer
+from apps.chat.consumers import WS_CLOSE_FORBIDDEN, WS_CLOSE_UNAUTHENTICATED, ChatConsumer
 from apps.chat.models import ChatMessage, ChatThread
 
 application = URLRouter(routing.websocket_urlpatterns)
@@ -19,16 +19,58 @@ class ChatConsumerConnectTest(TestCase):
         self.user = User.objects.create_user(username="alice", password="pass")
         self.thread = ChatThread.objects.create(user=self.user)
 
-    async def test_connect_accepts_and_sends_system_message(self) -> None:
-        communicator = WebsocketCommunicator(application, f"/ws/chat/{self.thread.id}/")
+    def _communicator(self, user: User | AnonymousUser, thread_id: int | None = None) -> WebsocketCommunicator:
+        thread_id = self.thread.id if thread_id is None else thread_id
+        communicator = WebsocketCommunicator(application, f"/ws/chat/{thread_id}/")
+        communicator.scope["user"] = user
+        return communicator
+
+    async def test_owner_connects_and_gets_system_message(self) -> None:
+        communicator = self._communicator(self.user)
         connected, _ = await communicator.connect()
         self.assertTrue(connected)
         response = await communicator.receive_json_from()
         self.assertEqual(response["sender"], "System")
         await communicator.disconnect()
 
-    async def test_disconnect_does_not_raise(self) -> None:
+    async def test_staff_may_connect_to_someone_elses_thread(self) -> None:
+        staff = await database_sync_to_async(User.objects.create_user)(
+            username="staff",
+            password="pass",
+            is_staff=True,
+        )
+        communicator = self._communicator(staff)
+        connected, _ = await communicator.connect()
+        self.assertTrue(connected)
+        await communicator.disconnect()
+
+    async def test_anonymous_connection_is_rejected(self) -> None:
+        communicator = self._communicator(AnonymousUser())
+        connected, code = await communicator.connect()
+        self.assertFalse(connected)
+        self.assertEqual(code, WS_CLOSE_UNAUTHENTICATED)
+
+    async def test_connection_without_a_user_in_scope_is_rejected(self) -> None:
         communicator = WebsocketCommunicator(application, f"/ws/chat/{self.thread.id}/")
+        connected, code = await communicator.connect()
+        self.assertFalse(connected)
+        self.assertEqual(code, WS_CLOSE_UNAUTHENTICATED)
+
+    async def test_other_user_cannot_connect_to_the_thread(self) -> None:
+        intruder = await database_sync_to_async(User.objects.create_user)(username="mallory", password="pass")
+        communicator = self._communicator(intruder)
+        connected, code = await communicator.connect()
+        self.assertFalse(connected)
+        self.assertEqual(code, WS_CLOSE_FORBIDDEN)
+
+    async def test_missing_thread_is_rejected(self) -> None:
+        communicator = self._communicator(self.user, thread_id=99999)
+        connected, code = await communicator.connect()
+        self.assertFalse(connected)
+        self.assertEqual(code, WS_CLOSE_FORBIDDEN)
+
+    async def test_disconnect_does_not_raise(self) -> None:
+        communicator = self._communicator(self.user)
         await communicator.connect()
         await communicator.receive_json_from()
         await communicator.disconnect()
@@ -74,18 +116,6 @@ class ChatConsumerReceiveTest(TestCase):
         await sender_comm.disconnect()
         await listener_comm.disconnect()
 
-    async def test_anonymous_user_gets_auth_error(self) -> None:
-        communicator = await self._connected_communicator(AnonymousUser())
-
-        await communicator.send_json_to({"message": "Hello"})
-        response = await communicator.receive_json_from()
-
-        self.assertEqual(response["sender"], "System")
-        self.assertIn("authenticated", response["message"])
-        self.assertEqual(await self._message_count(), 0)
-
-        await communicator.disconnect()
-
     async def test_invalid_json_returns_error_message(self) -> None:
         communicator = await self._connected_communicator(self.user)
 
@@ -108,6 +138,15 @@ class ChatConsumerReceiveTest(TestCase):
 
         await communicator.disconnect()
 
+    async def test_blank_message_is_ignored(self) -> None:
+        communicator = await self._connected_communicator(self.user)
+
+        await communicator.send_json_to({"message": "   "})
+        self.assertTrue(await communicator.receive_nothing())
+        self.assertEqual(await self._message_count(), 0)
+
+        await communicator.disconnect()
+
     async def test_broadcast_marks_user_messages_as_non_html(self) -> None:
         communicator = await self._connected_communicator(self.user)
 
@@ -116,20 +155,6 @@ class ChatConsumerReceiveTest(TestCase):
 
         self.assertFalse(response["is_html"])
         self.assertEqual(response["message"], "<b>not bold</b>")
-
-        await communicator.disconnect()
-
-    async def test_unknown_user_reports_database_error(self) -> None:
-        # An unsaved User instance is not anonymous, so the consumer gets past the
-        # auth check and then fails to load the sender row.
-        communicator = await self._connected_communicator(User(id=999999, username="ghost"))
-
-        await communicator.send_json_to({"message": "Hello"})
-        response = await communicator.receive_json_from()
-
-        self.assertEqual(response["sender"], "System")
-        self.assertIn("Database error", response["message"])
-        self.assertEqual(await self._message_count(), 0)
 
         await communicator.disconnect()
 

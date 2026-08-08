@@ -52,10 +52,11 @@ class GetMessagesViewTest(TestCase):
         response = self.client.get(reverse("chat:get_messages", args=[self.thread.id]))
         self.assertEqual(response.status_code, 200)
 
-    def test_other_user_gets_403(self) -> None:
+    def test_other_user_gets_404(self) -> None:
+        # Reported as missing rather than forbidden so thread ids stay unguessable.
         self.client.login(username="other", password="pass")
         response = self.client.get(reverse("chat:get_messages", args=[self.thread.id]))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_only_new_messages_filter(self) -> None:
         msg2 = ChatMessage.objects.create(thread=self.thread, sender=self.owner, text="Second")
@@ -146,6 +147,20 @@ class SendMessageViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
+    @patch("apps.chat.views.async_to_sync")
+    @patch("apps.chat.views.notify_admin_about_message")
+    def test_other_user_cannot_post_into_the_thread(self, _mock_notify: object, _mock_async: object) -> None:
+        User.objects.create_user(username="mallory", password="pass")
+        self.client.login(username="mallory", password="pass")
+
+        response = self.client.post(
+            reverse("chat:send_message", args=[self.thread.id]),
+            {"message": "Injected"},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(ChatMessage.objects.filter(thread=self.thread).count(), 0)
+
 
 class ThreadListViewTest(TestCase):
     def setUp(self) -> None:
@@ -195,6 +210,17 @@ class ChatRoomViewTest(TestCase):
         self.client.login(username="owner", password="pass")
         response = self.client.get(reverse("chat:chat_room", args=[99999]))
         self.assertEqual(response.status_code, 404)
+
+    def test_other_user_cannot_open_the_thread(self) -> None:
+        User.objects.create_user(username="mallory", password="pass")
+        self.client.login(username="mallory", password="pass")
+        response = self.client.get(reverse("chat:chat_room", args=[self.thread.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_staff_can_open_any_thread(self) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.get(reverse("chat:chat_room", args=[self.thread.id]))
+        self.assertEqual(response.status_code, 200)
 
 
 class CreateOrderFromChatTest(TestCase):

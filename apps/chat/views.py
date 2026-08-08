@@ -16,12 +16,13 @@ from apps.base.utils.is_admin import is_admin
 from apps.builder.models.pc_build import OrderProgress, PCBuild, PCBuildOrder
 
 from .models import ChatMessage, ChatThread
+from .utils.access import get_accessible_thread
 from .utils.send_mail import create_order, notify_admin_about_message
 
 
 @login_required
 def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
-    thread = get_object_or_404(ChatThread, id=thread_id)
+    thread = get_accessible_thread(request.user, thread_id)
     chat_messages = ChatMessage.objects.filter(thread=thread).order_by("timestamp")
 
     context: dict[str, Any] = {
@@ -38,7 +39,7 @@ def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
 @login_required
 def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
     if request.method == "POST":
-        thread = get_object_or_404(ChatThread, id=thread_id)
+        thread = get_accessible_thread(request.user, thread_id)
         message_text = request.POST.get("message", "").strip()
 
         if message_text:
@@ -71,10 +72,7 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
 
 @login_required
 def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
-    thread = get_object_or_404(ChatThread, id=thread_id)
-
-    if not request.user.is_staff and request.user != thread.user:
-        return JsonResponse({"error": "Access denied"}, status=403)
+    thread = get_accessible_thread(request.user, thread_id)
 
     last_id = request.GET.get("last_id", 0)
     try:
@@ -102,7 +100,7 @@ def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
 @login_required
 @transaction.atomic
 def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse:
-    thread = get_object_or_404(ChatThread, id=thread_id)
+    thread = get_accessible_thread(request.user, thread_id)
 
     if not request.user.is_staff:
         messages.error(request, "You don't have permission to create orders")
@@ -171,7 +169,7 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
 @login_required
 @transaction.atomic
 def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
-    thread = get_object_or_404(ChatThread, id=thread_id)
+    thread = get_accessible_thread(request.user, thread_id)
 
     if not request.user.is_staff:
         messages.error(request, "You don't have permission to send component lists")
