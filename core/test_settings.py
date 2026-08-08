@@ -8,12 +8,12 @@ os.environ.setdefault("EMAIL_USE_TLS", "False")
 os.environ.setdefault("EMAIL_HOST_USER", "test@example.com")
 os.environ.setdefault("EMAIL_HOST_PASSWORD", "test")
 
-from core.settings import *  # noqa: E402, F401, F403
+from core.settings import *  # noqa: F403
 
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
-    }
+    },
 }

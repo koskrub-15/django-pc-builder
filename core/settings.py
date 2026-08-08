@@ -94,7 +94,8 @@ DATABASES = {
         env.str(
             "DJANGO__DATABASE_URL",
             default=f"postgres://{env.str('POSTGRES_USER', default='')}:{env.str('POSTGRES_PASSWORD', default='')}@"
-            f"{env.str('POSTGRES_HOST', default='db')}:{env.str('POSTGRES_PORT', default='5432')}/{env.str('POSTGRES_DB', default='')}",
+            f"{env.str('POSTGRES_HOST', default='db')}:{env.str('POSTGRES_PORT', default='5432')}"
+            f"/{env.str('POSTGRES_DB', default='')}",
         ),
     ),
 }
@@ -125,7 +126,7 @@ CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels_redis.core.RedisChannelLayer",
         "CONFIG": {
-            "hosts": [("redis", 6379)],
+            "hosts": [(env.str("REDIS_HOST", default="redis"), env.int("REDIS_PORT", default=6379))],
         },
     },
 }
@@ -142,7 +143,6 @@ ACCOUNT_SIGNUP_FIELDS = ["email*", "username*", "password1*", "password2*"]
 ACCOUNT_EMAIL_VERIFICATION = "none"
 LOGIN_REDIRECT_URL = "/"
 ACCOUNT_LOGOUT_REDIRECT_URL = "/"
-ACCOUNT_LOGOUT_ON_GET = True
 
 
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
@@ -154,9 +154,34 @@ EMAIL_HOST_PASSWORD = env.str("EMAIL_HOST_PASSWORD")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 
-CSRF_TRUSTED_ORIGINS = [
-    "http://site.homework.local.net:60000",
-]
+# Whoever deploys this fills in their own details; every field is optional and
+# the About page simply omits what is left blank. Nothing personal is committed.
+SITE_OWNER = {
+    "name": env.str("SITE__OWNER_NAME", default=""),
+    "role": env.str("SITE__OWNER_ROLE", default=""),
+    "bio": env.str("SITE__OWNER_BIO", default=""),
+    "github": env.str("SITE__OWNER_GITHUB", default=""),
+    "telegram": env.str("SITE__OWNER_TELEGRAM", default=""),
+    "linkedin": env.str("SITE__OWNER_LINKEDIN", default=""),
+    "email": env.str("SITE__OWNER_EMAIL", default=""),
+}
+
+
+CSRF_TRUSTED_ORIGINS = env.list("DJANGO__CSRF_TRUSTED_ORIGINS", default=[])
+
+if not DEBUG:
+    # Terminating TLS at the reverse proxy means Django only ever sees plain
+    # HTTP, so it needs the forwarded header to know the request was secure —
+    # without it SECURE_SSL_REDIRECT would loop forever.
+    SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+    SECURE_HSTS_SECONDS = 60 * 60 * 24 * 365
+    SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+    SECURE_HSTS_PRELOAD = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = "DENY"
 
 STATICFILES_FINDERS = [
     "django.contrib.staticfiles.finders.FileSystemFinder",
