@@ -1,3 +1,8 @@
+"""Test settings: in-memory SQLite, in-memory channel layer, locmem email.
+
+No .env and no services are needed; CI runs with nothing but a checkout.
+"""
+
 import os
 
 os.environ.setdefault("DJANGO__SECRET_KEY", "test-only-secret-key-not-for-production")

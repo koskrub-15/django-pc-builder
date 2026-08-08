@@ -2,7 +2,9 @@ from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from django.contrib.auth.models import User
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 from django.utils import timezone
 
@@ -218,3 +220,32 @@ class EditComponentViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.component.refresh_from_db()
         self.assertEqual(self.component.name, "Old CPU")
+
+
+class TrackerQueryCountTest(TestCase):
+    """The tracker renders build, customer and components per order."""
+
+    def setUp(self) -> None:
+        User.objects.create_user(username="staff", password="pass", is_staff=True)
+        self.client.login(username="staff", password="pass")
+
+    def _add_order(self, name: str) -> None:
+        build = PCBuild.objects.create(name=name)
+        build.components.add(PCComponent.objects.create(name=f"part-{name}", price=Decimal("10.00")))
+        customer = User.objects.create_user(username=f"customer-{name}", password="pass")
+        order = PCBuildOrder.objects.create(build=build, customer=customer)
+        OrderProgress.objects.create(order=order)
+
+    def _queries_for_tracker(self) -> int:
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(reverse("builder:tracker"))
+        return len(ctx.captured_queries)
+
+    def test_query_count_does_not_grow_with_the_number_of_orders(self) -> None:
+        self._add_order("one")
+        baseline = self._queries_for_tracker()
+
+        for name in ("two", "three", "four"):
+            self._add_order(name)
+
+        self.assertEqual(self._queries_for_tracker(), baseline)

@@ -1,3 +1,5 @@
+"""URL routes for the staff-only build catalogue and order tracker."""
+
 from django.urls import path
 
 from . import views

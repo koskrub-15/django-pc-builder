@@ -1,3 +1,5 @@
+"""The signed-in customer's order history."""
+
 from django.contrib.auth.decorators import login_required
 from django.http import HttpRequest, HttpResponse
 from django.shortcuts import render
@@ -7,6 +9,7 @@ from apps.builder.models.pc_build import PCBuildOrder
 
 @login_required
 def index(request: HttpRequest) -> HttpResponse:
+    """List the customer's own orders with their build and assembly progress."""
     orders = (
         PCBuildOrder.objects.filter(customer=request.user)
         .select_related("build", "progress")

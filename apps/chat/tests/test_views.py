@@ -3,7 +3,9 @@ from decimal import Decimal
 from unittest.mock import Mock, patch
 
 from django.contrib.auth.models import User
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.builder.models.pc_build import OrderProgress, PCBuild, PCBuildOrder, PCComponent
@@ -52,10 +54,11 @@ class GetMessagesViewTest(TestCase):
         response = self.client.get(reverse("chat:get_messages", args=[self.thread.id]))
         self.assertEqual(response.status_code, 200)
 
-    def test_other_user_gets_403(self) -> None:
+    def test_other_user_gets_404(self) -> None:
+        # Reported as missing rather than forbidden so thread ids stay unguessable.
         self.client.login(username="other", password="pass")
         response = self.client.get(reverse("chat:get_messages", args=[self.thread.id]))
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(response.status_code, 404)
 
     def test_only_new_messages_filter(self) -> None:
         msg2 = ChatMessage.objects.create(thread=self.thread, sender=self.owner, text="Second")
@@ -146,6 +149,20 @@ class SendMessageViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 302)
 
+    @patch("apps.chat.views.async_to_sync")
+    @patch("apps.chat.views.notify_admin_about_message")
+    def test_other_user_cannot_post_into_the_thread(self, _mock_notify: object, _mock_async: object) -> None:
+        User.objects.create_user(username="mallory", password="pass")
+        self.client.login(username="mallory", password="pass")
+
+        response = self.client.post(
+            reverse("chat:send_message", args=[self.thread.id]),
+            {"message": "Injected"},
+        )
+
+        self.assertEqual(response.status_code, 404)
+        self.assertEqual(ChatMessage.objects.filter(thread=self.thread).count(), 0)
+
 
 class ThreadListViewTest(TestCase):
     def setUp(self) -> None:
@@ -196,6 +213,17 @@ class ChatRoomViewTest(TestCase):
         response = self.client.get(reverse("chat:chat_room", args=[99999]))
         self.assertEqual(response.status_code, 404)
 
+    def test_other_user_cannot_open_the_thread(self) -> None:
+        User.objects.create_user(username="mallory", password="pass")
+        self.client.login(username="mallory", password="pass")
+        response = self.client.get(reverse("chat:chat_room", args=[self.thread.id]))
+        self.assertEqual(response.status_code, 404)
+
+    def test_staff_can_open_any_thread(self) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.get(reverse("chat:chat_room", args=[self.thread.id]))
+        self.assertEqual(response.status_code, 200)
+
 
 class CreateOrderFromChatTest(TestCase):
     def setUp(self) -> None:
@@ -242,10 +270,26 @@ class CreateOrderFromChatTest(TestCase):
         self.assertIn("RTX 5090", message.text)
 
     @patch("apps.chat.views.create_order")
-    def test_unknown_build_returns_404(self, _mock_create_order: Mock) -> None:
+    def test_unknown_build_reports_an_error_in_the_chat_room(self, _mock_create_order: Mock) -> None:
         self.client.login(username="staff", password="pass")
-        response = self.client.post(self.url, {"build_id": "99999"})
-        self.assertEqual(response.status_code, 404)
+        response = self.client.post(self.url, {"build_id": "99999"}, follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Selected PC build does not exist")
+        self.assertEqual(PCBuildOrder.objects.count(), 0)
+
+    @patch("apps.chat.views.create_order")
+    def test_non_numeric_build_id_reports_an_error(self, _mock_create_order: Mock) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.post(self.url, {"build_id": "abc"}, follow=True)
+
+        self.assertContains(response, "Selected PC build does not exist")
+        self.assertEqual(PCBuildOrder.objects.count(), 0)
+
+    def test_get_request_is_rejected(self) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 405)
         self.assertEqual(PCBuildOrder.objects.count(), 0)
 
 
@@ -279,16 +323,18 @@ class SendComponentListTest(TestCase):
         self.client.post(self.url, {"build_id": str(self.build.id), "service_fee": "free"})
         self.assertIn("Service fee: <b>0.00", ChatMessage.objects.get(thread=self.thread).text)
 
-    def test_get_request_sends_nothing(self) -> None:
+    def test_get_request_is_rejected(self) -> None:
         self.client.login(username="staff", password="pass")
         response = self.client.get(self.url)
-        self.assertRedirects(response, reverse("chat:chat_room", args=[self.thread.id]))
+        self.assertEqual(response.status_code, 405)
         self.assertEqual(ChatMessage.objects.count(), 0)
 
-    def test_unknown_build_returns_404(self) -> None:
+    def test_unknown_build_reports_an_error_in_the_chat_room(self) -> None:
         self.client.login(username="staff", password="pass")
-        response = self.client.post(self.url, {"build_id": "99999"})
-        self.assertEqual(response.status_code, 404)
+        response = self.client.post(self.url, {"build_id": "99999"}, follow=True)
+
+        self.assertContains(response, "Selected PC build does not exist")
+        self.assertEqual(ChatMessage.objects.count(), 0)
 
     def test_component_names_are_escaped_in_the_generated_table(self) -> None:
         self.build.components.add(PCComponent.objects.create(name="<script>x</script>", price=Decimal("1.00")))
@@ -339,3 +385,47 @@ class ChatMessageEscapingTest(TestCase):
         )
         response = self.client.get(reverse("chat:chat_room", args=[self.thread.id]))
         self.assertIn("<b>Order #1</b>", response.content.decode())
+
+
+class ChatQueryCountTest(TestCase):
+    """Chat listings must not issue queries per message or per thread."""
+
+    def setUp(self) -> None:
+        self.staff = User.objects.create_user(username="staff", password="pass", is_staff=True)
+        self.owner = User.objects.create_user(username="owner", password="pass")
+        self.thread = ChatThread.objects.create(user=self.owner)
+        self.client.login(username="staff", password="pass")
+
+    def _queries_for(self, url: str) -> int:
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(url)
+        return len(ctx.captured_queries)
+
+    def test_chat_room_query_count_is_flat_in_messages(self) -> None:
+        url = reverse("chat:chat_room", args=[self.thread.id])
+        ChatMessage.objects.create(thread=self.thread, sender=self.owner, text="one")
+        baseline = self._queries_for(url)
+
+        for text in ("two", "three", "four"):
+            ChatMessage.objects.create(thread=self.thread, sender=self.staff, text=text)
+
+        self.assertEqual(self._queries_for(url), baseline)
+
+    def test_thread_list_query_count_is_flat_in_threads(self) -> None:
+        url = reverse("chat:thread_list")
+        baseline = self._queries_for(url)
+
+        for name in ("a", "b", "c"):
+            ChatThread.objects.create(user=User.objects.create_user(username=name, password="pass"))
+
+        self.assertEqual(self._queries_for(url), baseline)
+
+    def test_get_messages_query_count_is_flat_in_messages(self) -> None:
+        url = reverse("chat:get_messages", args=[self.thread.id])
+        ChatMessage.objects.create(thread=self.thread, sender=self.owner, text="one")
+        baseline = self._queries_for(url)
+
+        for text in ("two", "three", "four"):
+            ChatMessage.objects.create(thread=self.thread, sender=self.staff, text=text)
+
+        self.assertEqual(self._queries_for(url), baseline)

@@ -1,3 +1,10 @@
+"""ASGI entry point: plain HTTP plus the authenticated WebSocket router.
+
+Exposes the ASGI callable as a module-level variable named ``application``.
+Daphne serves this; Gunicorn serves core.wsgi for HTTP only.
+https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
+"""
+
 import os
 
 from channels.auth import AuthMiddlewareStack
@@ -6,15 +13,8 @@ from channels.security.websocket import AllowedHostsOriginValidator
 from django.core.asgi import get_asgi_application
 
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "core.settings")
-"""
-ASGI config for core project.
 
-It exposes the ASGI callable as a module-level variable named ``application``.
-
-For more information on this file, see
-https://docs.djangoproject.com/en/5.2/howto/deployment/asgi/
-"""
-
+# Must be initialised before the routing module imports any model.
 django_asgi_app = get_asgi_application()
 
 from apps.chat import routing  # noqa: E402

@@ -1,3 +1,5 @@
+"""URL routes for the services page."""
+
 from django.urls import path
 
 from . import views

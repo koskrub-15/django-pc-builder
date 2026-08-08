@@ -39,6 +39,19 @@ gets an email at each milestone.
 
 ---
 
+## 📸 Screenshots
+
+|                                                       |                                     |
+| :---------------------------------------------------: | :---------------------------------: |
+|              ![Homepage](files/home.jpg)              |    ![Services](files/store.jpg)     |
+|                      _Homepage_                       |           _Services page_           |
+|         ![Chat with an admin](files/chat.jpg)         | ![Order tracker](files/tracker.jpg) |
+| _Live chat, with the admin's order and quoting panel_ |       _Order tracker (staff)_       |
+|                ![Blog](files/blog.jpg)                |                                     |
+|                _Blog with categories_                 |                                     |
+
+---
+
 ## 🏗️ Architecture
 
 HTTP and WebSocket traffic are served by two different processes. Nginx is the
@@ -219,7 +232,7 @@ apps/
   builder/     — components, builds, orders, progress tracker
   chat/        — real-time WebSocket chat (admin ↔ customer)
   profile/     — user order history
-  store/       — placeholder landing page
+  store/       — services, ordering steps and FAQ page
   templates/   — all HTML templates (shared across apps)
 core/
   settings.py       — main settings

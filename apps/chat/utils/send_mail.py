@@ -1,53 +1,58 @@
-import logging
+"""Order and chat notifications sent to the customer and to the site owner."""
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
 
+from apps.base.utils.send_html_email import send_html_email
 from apps.builder.models.pc_build import PCBuildOrder
-
-logger = logging.getLogger(__name__)
 
 
 def notify_admin_about_message(user_email: str, username: str, user_message: str) -> None:
+    """Tell the site owner that a customer opened or resumed a conversation."""
     subject = f"New message from {username}"
-    html_content = render_to_string(
-        "email/admin_message.html",
-        {"username": username, "user_message": user_message, "user_email": user_email, "subject": subject},
+    send_html_email(
+        subject=subject,
+        template_name="email/admin_message.html",
+        context={
+            "username": username,
+            "user_message": user_message,
+            "user_email": user_email,
+            "subject": subject,
+        },
+        recipients=[settings.DEFAULT_FROM_EMAIL],
     )
-    msg = EmailMultiAlternatives(subject, html_content, settings.DEFAULT_FROM_EMAIL, [settings.DEFAULT_FROM_EMAIL])
-    msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=True)
-    logger.info("Email sent to admin: %s", subject)
 
 
 def notify_user_about_order(user_email: str, username: str, order: PCBuildOrder, *, is_delivered: bool) -> None:
+    """Tell the customer their build has been completed or delivered."""
     if is_delivered:
         subject = "Your build has been delivered"
         message = "Your build has been delivered to you"
     else:
         subject = "Your build has been sent"
         message = "Your build is completed and has been sent to you"
-    html_content = render_to_string(
-        "email/order_message.html",
-        {"username": username, "order": order, "subject": subject, "message": message},
+
+    send_html_email(
+        subject=subject,
+        template_name="email/order_message.html",
+        context={"username": username, "order": order, "subject": subject, "message": message},
+        recipients=[user_email],
     )
-    msg = EmailMultiAlternatives(subject, html_content, settings.DEFAULT_FROM_EMAIL, [user_email])
-    msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=True)
 
 
 def create_order(user_email: str, username: str, order: PCBuildOrder) -> None:
+    """Confirm to the customer that an order has been created for them."""
     subject = "New PC Build Order"
-    context = {
-        "username": username,
-        "order": order,
-        "subject": subject,
-        "message": (
-            "We've created a PC build order for you. We'll keep you updated on your order status via chat and email."
-        ),
-    }
-    html_content = render_to_string("email/order_message.html", context)
-    msg = EmailMultiAlternatives(subject, html_content, settings.DEFAULT_FROM_EMAIL, [user_email])
-    msg.attach_alternative(html_content, "text/html")
-    msg.send(fail_silently=True)
+    send_html_email(
+        subject=subject,
+        template_name="email/order_message.html",
+        context={
+            "username": username,
+            "order": order,
+            "subject": subject,
+            "message": (
+                "We've created a PC build order for you. "
+                "We'll keep you updated on your order status via chat and email."
+            ),
+        },
+        recipients=[user_email],
+    )

@@ -1,7 +1,11 @@
+"""The About page contact form."""
+
 from django import forms
 
 
 class ContactForm(forms.Form):
+    """Message from a visitor, forwarded to the site owner by email."""
+
     name = forms.CharField(
         max_length=60,
         widget=forms.TextInput(

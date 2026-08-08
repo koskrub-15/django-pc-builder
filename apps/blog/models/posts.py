@@ -1,19 +1,27 @@
+"""Blog content: posts, the categories they belong to and their comments."""
+
 from django.db import models
 
 from apps.blog.utils.build_image_path import build_image_path
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=30)
+    """A tag a post can be filed under; also a public listing page."""
+
+    # Category pages are addressed by name, so duplicates would be unreachable.
+    name = models.CharField(max_length=30, unique=True)
 
     class Meta:
         verbose_name_plural = "categories"
+        ordering = ("name",)
 
     def __str__(self) -> str:
         return self.name
 
 
 class Post(models.Model):
+    """A blog article, written by staff."""
+
     title = models.CharField(max_length=255)
 
     body = models.TextField()
@@ -37,10 +45,12 @@ class Post(models.Model):
 
 
 class Comment(models.Model):
+    """A reader's reply to a post; guests may comment under any name."""
+
     author = models.CharField(max_length=60)
     body = models.TextField()
     created_on = models.DateTimeField(auto_now_add=True)
-    post = models.ForeignKey("Post", on_delete=models.CASCADE)
+    post = models.ForeignKey("Post", on_delete=models.CASCADE, related_name="comments")
 
     def __str__(self) -> str:
         return f"{self.author} on '{self.post}'"

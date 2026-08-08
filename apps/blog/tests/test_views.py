@@ -1,5 +1,7 @@
 from django.contrib.auth.models import User
+from django.db import connection
 from django.test import TestCase
+from django.test.utils import CaptureQueriesContext
 from django.urls import reverse
 
 from apps.blog.models.posts import Category, Comment, Post
@@ -95,6 +97,18 @@ class BlogCategoryViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["page_obj"].paginator.count, 0)
 
+    def test_partial_category_name_does_not_match(self) -> None:
+        response = self.client.get(reverse("blog:blog_category", args=["Hard"]))
+        self.assertEqual(response.context["page_obj"].paginator.count, 0)
+
+    def test_post_in_two_matching_categories_is_listed_once(self) -> None:
+        post = Post.objects.get(title="GPU Review")
+        post.categories.add(Category.objects.create(name="hardware"))
+
+        response = self.client.get(reverse("blog:blog_category", args=["Hardware"]))
+
+        self.assertEqual(response.context["page_obj"].paginator.count, 1)
+
 
 class BlogAdminViewsTest(TestCase):
     def setUp(self) -> None:
@@ -118,8 +132,21 @@ class BlogAdminViewsTest(TestCase):
     def test_delete_post_removes_post(self) -> None:
         self.client.login(username="staff", password="pass")
         post = Post.objects.create(title="To Delete", body="x")
-        self.client.get(reverse("blog:delete_post", args=[post.pk]))
+        response = self.client.post(reverse("blog:delete_post", args=[post.pk]))
+        self.assertRedirects(response, "/blog/")
         self.assertFalse(Post.objects.filter(pk=post.pk).exists())
+
+    def test_delete_post_rejects_get(self) -> None:
+        self.client.login(username="staff", password="pass")
+        post = Post.objects.create(title="Survivor", body="x")
+        response = self.client.get(reverse("blog:delete_post", args=[post.pk]))
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Post.objects.filter(pk=post.pk).exists())
+
+    def test_delete_missing_post_returns_404(self) -> None:
+        self.client.login(username="staff", password="pass")
+        response = self.client.post(reverse("blog:delete_post", args=[99999]))
+        self.assertEqual(response.status_code, 404)
 
 
 class CreatePostViewTest(TestCase):
@@ -226,10 +253,39 @@ class CategoryAdminViewsTest(TestCase):
 
     def test_delete_category_removes_it(self) -> None:
         category = Category.objects.create(name="Doomed")
-        response = self.client.get(reverse("blog:delete_category", args=[category.pk]))
+        response = self.client.post(reverse("blog:delete_category", args=[category.pk]))
         self.assertRedirects(response, "/blog/categories/")
         self.assertFalse(Category.objects.filter(pk=category.pk).exists())
 
+    def test_delete_category_rejects_get(self) -> None:
+        category = Category.objects.create(name="Doomed")
+        response = self.client.get(reverse("blog:delete_category", args=[category.pk]))
+        self.assertEqual(response.status_code, 405)
+        self.assertTrue(Category.objects.filter(pk=category.pk).exists())
+
     def test_delete_missing_category_returns_404(self) -> None:
-        response = self.client.get(reverse("blog:delete_category", args=[99999]))
+        response = self.client.post(reverse("blog:delete_category", args=[99999]))
         self.assertEqual(response.status_code, 404)
+
+
+class BlogIndexQueryCountTest(TestCase):
+    """The post list must not issue queries per post."""
+
+    def _add_post(self, title: str) -> None:
+        post = Post.objects.create(title=title, body="x")
+        post.categories.add(Category.objects.create(name=f"cat-{title}"))
+        Comment.objects.create(author="a", body="b", post=post)
+
+    def _queries_for_index(self) -> int:
+        with CaptureQueriesContext(connection) as ctx:
+            self.client.get(reverse("blog:index"))
+        return len(ctx.captured_queries)
+
+    def test_query_count_does_not_grow_with_the_number_of_posts(self) -> None:
+        self._add_post("one")
+        baseline = self._queries_for_index()
+
+        for title in ("two", "three", "four"):
+            self._add_post(title)
+
+        self.assertEqual(self._queries_for_index(), baseline)

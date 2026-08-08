@@ -7,16 +7,13 @@
         <head>
             <meta charset="UTF-8" />
             <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-            <meta name="description" content="My web page_title" />
-            <meta name="keywords" content="web, django, lab" />
+            <meta name="description"
+                  content="Custom PC builds assembled to order, with live chat and order tracking." />
+            <meta name="keywords"
+                  content="custom pc, pc building, components, gaming pc" />
             <title>
                 {% block title %}
-                    {% if page_title %}
-                        {{ page_title }}
-                    {% else %}
-                        My page
-                    {% endif %}
-                    | My site
+                    PC Builder
                 {% endblock title %}
             </title>
             {# [bootstrap]-[BEGIN] #}
@@ -40,9 +37,9 @@
             {% include "_helpers/_header.html" %}
             <div class="main">
                 {% block content %}
-                    <h1>Hello, World!</h1>
                 {% endblock content %}
             </div>
+            {% include "_helpers/_footer.html" %}
         </body>
     </html>
 {% endblock html %}

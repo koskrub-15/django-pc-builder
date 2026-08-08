@@ -1,3 +1,5 @@
+"""Forms for the staff-only build catalogue."""
+
 from typing import ClassVar
 
 from django import forms
@@ -6,6 +8,8 @@ from apps.builder.models.pc_build import PCBuild, PCComponent
 
 
 class PCBuildForm(forms.ModelForm):
+    """Name a build; its components are set separately from the picker."""
+
     component = forms.ModelChoiceField(
         queryset=PCComponent.objects.all(),
         required=False,
@@ -22,6 +26,8 @@ class PCBuildForm(forms.ModelForm):
 
 
 class PCComponentForm(forms.ModelForm):
+    """Create or edit a single component."""
+
     class Meta:
         model: ClassVar = PCComponent
         fields: ClassVar[list[str]] = ["name", "price", "link"]
