@@ -10,8 +10,17 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    ignore:
+      # Staying on the Django 5.2 LTS series on purpose (see pyproject.toml).
+      # Without this, every major release reopens the same pull request.
+      - dependency-name: "django"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
       interval: "weekly"
+    # A base-image bump must be paired with .python-version, or uv builds the
+    # venv against an interpreter the final stage never copies. The Dockerfile
+    # now fails the build on a mismatch, so these pull requests are safe to
+    # receive — they just need the second half applied before merging.

@@ -6,12 +6,13 @@ Django PC Builder & E-Commerce Platform — portfolio project. Full-stack Django
 
 ## Tech Stack
 
-- **Django 5.2** — main framework (WSGI + ASGI split)
+- **Django 5.2 LTS** — main framework (WSGI + ASGI split)
 - **Django Channels** — WebSocket for real-time chat
 - **PostgreSQL** — primary database
 - **Redis** — channel layer backend for WebSockets
 - **Nginx** — reverse proxy, serves static/media
 - **uv** — dependency management
+- **Python 3.14** — pinned in `.python-version` and the Dockerfile base image
 - **Docker Compose** — local and production environment
 
 ## Project Structure
@@ -84,6 +85,8 @@ CI enforces a 90% coverage floor (currently at 99%).
 - **Email**: all email functions use `fail_silently=True` — SMTP errors are logged but don't crash the request.
 - **No personal data in the repo**: the About page renders owner name/bio/socials from the `SITE_OWNER` settings dict (`SITE__OWNER_*` env vars), and every field is optional — a fresh clone shows only the project blurb and the contact form.
 - **Chat message escaping**: `ChatMessage.is_html` marks the few messages the app composes itself (order summaries, component tables, built with `format_html`). Those render unescaped; everything a user types must stay `is_html=False` or it becomes stored XSS.
+- **Django stays on the 5.2 LTS series** (`django>=5.2.13,<6`). Channels and crispy-bootstrap5 do not advertise Django 6.1 support, and Channels drives the whole WebSocket feature; 5.2 is supported until April 2028. Dependabot is told to skip Django majors, so a bump here is a deliberate decision, not an automated one — check the Django classifiers of Channels first.
+- **The Python version lives in two places that must agree**: `.python-version` and the `FROM python:` tag in the Dockerfile. `.python-version` is mounted into `uv sync`, so if it names a version the base image does not ship, uv builds the venv against an interpreter it downloads and the final stage never copies. `UV_PYTHON_DOWNLOADS=never` makes that fail the build instead of shipping a broken image. The venv itself lives at `/opt/venv`, outside the bind-mounted source tree, so no masking volume is needed and none can go stale across a version change.
 
 ## Code Conventions
 
