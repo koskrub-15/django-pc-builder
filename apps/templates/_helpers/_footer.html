@@ -1,9 +1,23 @@
-<footer>
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col text-center">
-                <p>My Webpage ©</p>
+<footer class="bg-dark text-white-50 mt-5 py-4">
+    <div class="container">
+        <div class="row gy-2 align-items-center">
+            <div class="col-12 col-md-6 text-center text-md-start">
+                <span class="fw-semibold text-white">PC Builder</span>
+                <span class="ms-2">Custom PC builds, assembled to order.</span>
             </div>
+            <nav class="col-12 col-md-6" aria-label="Footer">
+                <ul class="nav justify-content-center justify-content-md-end">
+                    <li class="nav-item">
+                        <a class="nav-link px-2 text-white-50" href="{% url 'store:index' %}">Services</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2 text-white-50" href="{% url 'blog:index' %}">Blog</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link px-2 text-white-50" href="{% url 'about:index' %}">About</a>
+                    </li>
+                </ul>
+            </nav>
         </div>
     </div>
 </footer>
