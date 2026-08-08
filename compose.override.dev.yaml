@@ -12,7 +12,6 @@ services:
     # the host directories here instead would leave nginx serving empty volumes.
     volumes: &app_volumes
       - ./:/wd/
-      - /wd/.venv/
       - /wd/__pycache__/
     develop:
       watch:
