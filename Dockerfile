@@ -1,5 +1,5 @@
 # [stage__base]-[BEGIN]================================================
-FROM python:3.13.1-slim AS base
+FROM python:3.14.0-slim AS base
 
 ENV PYTHONUNBUFFERED=1
 
@@ -46,6 +46,11 @@ ENV UV_LINK_MODE=copy
 # Enable caching for faster builds
 # https://docs.astral.sh/uv/guides/integration/docker/#caching
 ENV UV_CACHE_DIR=/opt/uv-cache/
+# Never let uv fetch its own interpreter. .python-version must match the base
+# image above; if it does not, uv would quietly build the venv against a
+# downloaded Python that the final stage never copies, producing an image whose
+# .venv/bin/python is a dangling symlink. Failing the build is the loud version.
+ENV UV_PYTHON_DOWNLOADS=never
 #
 RUN --mount=type=cache,target=/opt/uv-cache/ \
     --mount=type=bind,source=uv.lock,target=uv.lock \
