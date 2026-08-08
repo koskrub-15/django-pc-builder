@@ -1,3 +1,5 @@
+"""The About page and its contact form."""
+
 from django.conf import settings
 from django.contrib import messages
 from django.http import HttpRequest, HttpResponse
@@ -8,6 +10,7 @@ from apps.about.utils.send_mail import send_contact_message
 
 
 def index(request: HttpRequest) -> HttpResponse:
+    """Show the owner details from settings and handle the contact form."""
     if request.method == "POST":
         form = ContactForm(request.POST)
         if form.is_valid():

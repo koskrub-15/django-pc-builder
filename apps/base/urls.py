@@ -1,3 +1,5 @@
+"""URL routes for the homepage."""
+
 from django.urls import path
 
 from . import views

@@ -1,3 +1,5 @@
+"""Chat screens: the room itself, and the staff actions that post into it."""
+
 from datetime import timedelta
 from decimal import Decimal, InvalidOperation
 from typing import Any
@@ -38,6 +40,7 @@ def _parse_amount(raw: str | None) -> Decimal:
 
 @login_required
 def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
+    """Render one conversation, plus the order forms when staff open it."""
     thread = get_accessible_thread(request.user, thread_id)
     chat_messages = ChatMessage.objects.filter(thread=thread).select_related("sender").order_by("timestamp")
 
@@ -55,6 +58,11 @@ def chat_room(request: HttpRequest, thread_id: int) -> HttpResponse:
 
 @login_required
 def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
+    """Save a message and broadcast it to everyone watching the thread.
+
+    The owner's first message, and any message after an hour of silence,
+    also emails the site owner so a conversation is not missed.
+    """
     if request.method == "POST":
         thread = get_accessible_thread(request.user, thread_id)
         message_text = request.POST.get("message", "").strip()
@@ -89,6 +97,7 @@ def send_message(request: HttpRequest, thread_id: int) -> HttpResponse:
 
 @login_required
 def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
+    """Return a thread as JSON, optionally only what is newer than last_id."""
     thread = get_accessible_thread(request.user, thread_id)
 
     last_id = request.GET.get("last_id", 0)
@@ -118,6 +127,7 @@ def get_messages(request: HttpRequest, thread_id: int) -> JsonResponse:
 @require_POST
 @transaction.atomic
 def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse:
+    """Create an order for the thread's customer and confirm it in the chat."""
     thread = get_accessible_thread(request.user, thread_id)
 
     if not request.user.is_staff:
@@ -180,6 +190,7 @@ def create_order_from_chat(request: HttpRequest, thread_id: int) -> HttpResponse
 @require_POST
 @transaction.atomic
 def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
+    """Post a build's component and price breakdown into the chat."""
     thread = get_accessible_thread(request.user, thread_id)
 
     if not request.user.is_staff:
@@ -227,11 +238,13 @@ def send_component_list(request: HttpRequest, thread_id: int) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def thread_list(request: HttpRequest) -> HttpResponse:
+    """List every conversation for staff."""
     threads = ChatThread.objects.select_related("user")
     return render(request, "chat/thread_list.html", {"threads": threads})
 
 
 @login_required
 def contact_admin(request: HttpRequest) -> HttpResponse:
+    """Open the caller's conversation, creating it on first contact."""
     thread, _ = ChatThread.objects.get_or_create(user=request.user)
     return redirect("chat:chat_room", thread_id=thread.id)

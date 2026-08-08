@@ -1,3 +1,5 @@
+"""URL routes for the signed-in customer's order history."""
+
 from django.urls import path
 
 from apps.profile import views

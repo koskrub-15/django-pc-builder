@@ -1,3 +1,5 @@
+"""URL routes for the blog: public reading plus staff-only authoring."""
+
 from django.urls import path
 
 from apps.blog import views

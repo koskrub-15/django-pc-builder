@@ -1,3 +1,5 @@
+"""Forms for commenting on posts and for authoring them."""
+
 from typing import ClassVar
 
 from django import forms
@@ -6,6 +8,8 @@ from apps.blog.models.posts import Category, Post
 
 
 class CommentForm(forms.Form):
+    """A reply to a post; the author field is only used for guests."""
+
     author = forms.CharField(
         max_length=60,
         required=False,
@@ -21,6 +25,8 @@ class CommentForm(forms.Form):
 
 
 class PostForm(forms.ModelForm):
+    """Create or edit a post, including its image and categories."""
+
     class Meta:
         model = Post
         fields: ClassVar[list[str]] = ["title", "body", "categories", "image"]
@@ -37,6 +43,8 @@ class PostForm(forms.ModelForm):
 
 
 class CategoryForm(forms.ModelForm):
+    """Create or rename a category."""
+
     class Meta:
         model = Category
         fields: ClassVar[list[str]] = ["name"]

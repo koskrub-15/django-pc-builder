@@ -1,3 +1,5 @@
+"""The build catalogue and the orders placed against it."""
+
 from decimal import Decimal
 from typing import ClassVar
 
@@ -7,6 +9,8 @@ from django.db import models
 
 
 class PCComponent(models.Model):
+    """A single part with its price and a link to where it can be bought."""
+
     name = models.CharField(max_length=100)
     price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0.00"))])
     link = models.URLField(default="")
@@ -27,6 +31,8 @@ class PCComponent(models.Model):
 
 
 class PCBuild(models.Model):
+    """A named set of components offered to customers."""
+
     name = models.CharField(max_length=100)
     components = models.ManyToManyField(PCComponent)
 
@@ -35,6 +41,7 @@ class PCBuild(models.Model):
 
     @property
     def total_price(self) -> Decimal:
+        """Sum of the component prices."""
         return sum((component.price for component in self.components.all()), Decimal("0.00"))
 
     class Meta:
@@ -44,6 +51,8 @@ class PCBuild(models.Model):
 
 
 class PCBuildOrder(models.Model):
+    """A build a customer ordered, at the price agreed in the chat."""
+
     build = models.ForeignKey(PCBuild, on_delete=models.CASCADE)
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
@@ -57,6 +66,7 @@ class PCBuildOrder(models.Model):
 
     @property
     def total_price(self) -> Decimal:
+        """Build price plus the markup agreed with the customer."""
         return self.build.total_price + self.markup
 
     def __str__(self) -> str:
@@ -75,6 +85,8 @@ class PCBuildOrder(models.Model):
 
 
 class OrderProgress(models.Model):
+    """Assembly milestones for one order, updated by staff in the tracker."""
+
     order = models.OneToOneField(PCBuildOrder, on_delete=models.CASCADE, related_name="progress")
     are_components_ordered = models.BooleanField(default=False)
     are_components_arrived = models.BooleanField(default=False)

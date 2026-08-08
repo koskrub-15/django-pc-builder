@@ -1,3 +1,5 @@
+"""WebSocket routes, mounted by the ASGI application in core/asgi.py."""
+
 from django.urls import path
 
 from . import consumers

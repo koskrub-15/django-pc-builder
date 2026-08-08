@@ -1,3 +1,5 @@
+"""URL routes for the About page and its contact form."""
+
 from django.urls import path
 
 from . import views

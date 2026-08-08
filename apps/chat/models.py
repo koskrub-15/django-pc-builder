@@ -1,3 +1,5 @@
+"""One conversation per customer, and the messages inside it."""
+
 from typing import ClassVar
 
 from django.contrib.auth.models import User
@@ -5,6 +7,8 @@ from django.db import models
 
 
 class ChatThread(models.Model):
+    """A customer's conversation with staff."""
+
     # One thread per customer: contact_admin resolves it with get_or_create,
     # which raises MultipleObjectsReturned as soon as a second one exists.
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="chat_thread")
@@ -17,6 +21,8 @@ class ChatThread(models.Model):
 
 
 class ChatMessage(models.Model):
+    """A single message in a thread."""
+
     thread = models.ForeignKey(ChatThread, on_delete=models.CASCADE, related_name="messages")
     sender = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()

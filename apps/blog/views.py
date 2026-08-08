@@ -1,3 +1,5 @@
+"""Public blog reading and the staff-only authoring screens."""
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.core.paginator import Paginator
@@ -17,6 +19,7 @@ def _post_list() -> QuerySet[Post]:
 
 
 def index(request: HttpRequest) -> HttpResponse:
+    """List every post, newest first, four to a page."""
     posts = _post_list().order_by("-created_on")
     paginator = Paginator(posts, 4)
     page_number = request.GET.get("page")
@@ -33,6 +36,7 @@ def index(request: HttpRequest) -> HttpResponse:
 
 
 def blog_category(request: HttpRequest, category: str) -> HttpResponse:
+    """List the posts filed under one category."""
     # The links that reach this view are built from Category.name, so the match
     # is exact: __contains also pulled in every category the name is a substring
     # of, and listed a post once per matching category.
@@ -48,6 +52,11 @@ def blog_category(request: HttpRequest, category: str) -> HttpResponse:
 
 
 def blog_detail(request: HttpRequest, pk: int) -> HttpResponse:
+    """Show one post and accept a comment on it.
+
+    Signed-in readers comment under their username; guests may supply a
+    name, and fall back to "Anonymous".
+    """
     post = get_object_or_404(Post.objects.prefetch_related("categories"), pk=pk)
     form = CommentForm()
     all_categories = Category.objects.all()
@@ -87,6 +96,7 @@ def blog_detail(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def create_post(request: HttpRequest) -> HttpResponse:
+    """Show and handle the new-post form."""
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES)
         if form.is_valid():
@@ -101,6 +111,7 @@ def create_post(request: HttpRequest) -> HttpResponse:
 @user_passes_test(is_admin)
 @require_POST
 def delete_post(request: HttpRequest, pk: int) -> HttpResponse:
+    """Delete a post and return to the blog index."""
     post = get_object_or_404(Post, pk=pk)
     post.delete()
     messages.success(request, "Post deleted successfully!")
@@ -110,6 +121,7 @@ def delete_post(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def update_post(request: HttpRequest, pk: int) -> HttpResponse:
+    """Show and handle the edit form for an existing post."""
     post = get_object_or_404(Post, pk=pk)
     if request.method == "POST":
         form = PostForm(request.POST, request.FILES, instance=post)
@@ -124,6 +136,7 @@ def update_post(request: HttpRequest, pk: int) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def create_category(request: HttpRequest) -> HttpResponse:
+    """Show the category manager and create a category from it."""
     if request.method == "POST":
         form = CategoryForm(request.POST)
         if form.is_valid():
@@ -147,6 +160,7 @@ def create_category(request: HttpRequest) -> HttpResponse:
 @login_required
 @user_passes_test(is_admin)
 def update_category(request: HttpRequest, pk: int) -> HttpResponse:
+    """Rename a category from the category manager."""
     category = get_object_or_404(Category, pk=pk)
     if request.method == "POST":
         form = CategoryForm(request.POST, instance=category)
@@ -173,6 +187,7 @@ def update_category(request: HttpRequest, pk: int) -> HttpResponse:
 @user_passes_test(is_admin)
 @require_POST
 def delete_category(request: HttpRequest, pk: int) -> HttpResponse:
+    """Delete a category; its posts are kept and simply lose the tag."""
     category = get_object_or_404(Category, pk=pk)
     category.delete()
     messages.success(request, "Category deleted successfully!")

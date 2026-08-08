@@ -1,3 +1,5 @@
+"""HTTP routes for the chat; the WebSocket route lives in routing.py."""
+
 from django.urls import path
 
 from . import views

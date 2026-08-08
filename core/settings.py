@@ -1,3 +1,5 @@
+"""Django settings, read from the environment via django-environ."""
+
 from pathlib import Path
 
 import environ
