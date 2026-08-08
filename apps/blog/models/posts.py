@@ -4,10 +4,12 @@ from apps.blog.utils.build_image_path import build_image_path
 
 
 class Category(models.Model):
-    name = models.CharField(max_length=30)
+    # Category pages are addressed by name, so duplicates would be unreachable.
+    name = models.CharField(max_length=30, unique=True)
 
     class Meta:
         verbose_name_plural = "categories"
+        ordering = ("name",)
 
     def __str__(self) -> str:
         return self.name

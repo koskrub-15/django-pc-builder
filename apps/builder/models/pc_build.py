@@ -1,12 +1,14 @@
 from decimal import Decimal
+from typing import ClassVar
 
 from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator
 from django.db import models
 
 
 class PCComponent(models.Model):
     name = models.CharField(max_length=100)
-    price = models.DecimalField(max_digits=10, decimal_places=2)
+    price = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal("0.00"))])
     link = models.URLField(default="")
 
     def __str__(self) -> str:
@@ -16,6 +18,12 @@ class PCComponent(models.Model):
         verbose_name = "PC Component"
         verbose_name_plural = "PC Components"
         ordering = ("price", "name")
+        constraints: ClassVar[list[models.BaseConstraint]] = [
+            models.CheckConstraint(
+                condition=models.Q(price__gte=Decimal("0.00")),
+                name="pccomponent_price_non_negative",
+            ),
+        ]
 
 
 class PCBuild(models.Model):
@@ -40,7 +48,12 @@ class PCBuildOrder(models.Model):
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
     created_on = models.DateTimeField(auto_now_add=True)
     address = models.CharField(max_length=100, default="The customer didn't provide an address", blank=True)
-    markup = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal("0.00"))
+    markup = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=Decimal("0.00"),
+        validators=[MinValueValidator(Decimal("0.00"))],
+    )
 
     @property
     def total_price(self) -> Decimal:
@@ -53,6 +66,12 @@ class PCBuildOrder(models.Model):
         verbose_name = "PC Build Order"
         verbose_name_plural = "PC Build Orders"
         ordering = ("-created_on",)
+        constraints: ClassVar[list[models.BaseConstraint]] = [
+            models.CheckConstraint(
+                condition=models.Q(markup__gte=Decimal("0.00")),
+                name="pcbuildorder_markup_non_negative",
+            ),
+        ]
 
 
 class OrderProgress(models.Model):

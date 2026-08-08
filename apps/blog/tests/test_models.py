@@ -1,3 +1,4 @@
+from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from apps.blog.models.posts import Category, Comment, Post
@@ -38,3 +39,10 @@ class CommentModelTest(TestCase):
 
     def test_post_exposes_its_comments(self) -> None:
         self.assertEqual(list(self.comment.post.comments.all()), [self.comment])
+
+
+class CategoryConstraintTest(TestCase):
+    def test_category_names_are_unique(self) -> None:
+        Category.objects.create(name="Hardware")
+        with self.assertRaises(IntegrityError):
+            Category.objects.create(name="Hardware")

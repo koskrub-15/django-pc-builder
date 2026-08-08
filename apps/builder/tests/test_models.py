@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth.models import User
+from django.db.utils import IntegrityError
 from django.test import TestCase
 
 from apps.builder.models.pc_build import OrderProgress, PCBuild, PCBuildOrder, PCComponent
@@ -71,3 +72,15 @@ class OrderProgressTest(TestCase):
         self.assertFalse(self.progress.are_components_ordered)
         self.assertFalse(self.progress.is_completed)
         self.assertFalse(self.progress.is_delivered)
+
+
+class MoneyConstraintTest(TestCase):
+    def test_component_price_cannot_be_negative(self) -> None:
+        with self.assertRaises(IntegrityError):
+            PCComponent.objects.create(name="Refund", price=Decimal("-1.00"))
+
+    def test_order_markup_cannot_be_negative(self) -> None:
+        build = PCBuild.objects.create(name="Build")
+        customer = User.objects.create_user(username="erin", password="pass")
+        with self.assertRaises(IntegrityError):
+            PCBuildOrder.objects.create(build=build, customer=customer, markup=Decimal("-5.00"))
