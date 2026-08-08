@@ -23,9 +23,11 @@
             {% endif %}
         {% endblock page_title %}
         {% block page_content %}
-            <div class="card shadow-sm mb-4">
-                <div class="card-body p-3">{% include "_components/paginator.html" %}</div>
-            </div>
+            {% if page_obj.has_other_pages %}
+                <div class="card shadow-sm mb-4">
+                    <div class="card-body p-3">{% include "_components/paginator.html" %}</div>
+                </div>
+            {% endif %}
             <div class="row g-4">
                 {% for post in page_obj %}
                     <div class="col-12">
@@ -91,9 +93,11 @@
                     </div>
                 {% endfor %}
             </div>
-            <div class="card shadow-sm mt-4">
-                <div class="card-body p-3">{% include "_components/paginator.html" %}</div>
-            </div>
+            {% if page_obj.has_other_pages %}
+                <div class="card shadow-sm mt-4">
+                    <div class="card-body p-3">{% include "_components/paginator.html" %}</div>
+                </div>
+            {% endif %}
         {% endblock page_content %}
         {# djlint:off H041 — the container wraps the page_title/page_content blocks on purpose, so children override in place. #}
     </div>
