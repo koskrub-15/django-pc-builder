@@ -6,7 +6,7 @@ exclude: |
 repos:
   - repo: https://github.com/astral-sh/uv-pre-commit
     # uv version.
-    rev: 0.11.26
+    rev: 0.12.3
     hooks:
       - id: uv-lock
 
@@ -55,21 +55,21 @@ repos:
             )$
 
   - repo: https://github.com/djlint/djLint
-    rev: v1.36.4
+    rev: v1.44.1
     # A collection of git hooks for Django projects.
     hooks:
       - id: djlint-reformat-django
       - id: djlint-django
 
   - repo: https://github.com/adamchainz/django-upgrade
-    rev: 1.25.0
+    rev: 1.31.1
     # Upgrade your Django projects.
     hooks:
       - id: django-upgrade
         args: [--target-version, "5.2"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v2.1.0
+    rev: v2.3.0
     # Static type checker for Python.
     hooks:
       - id: mypy
@@ -78,7 +78,7 @@ repos:
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
     # Ruff version.
-    rev: v0.15.20
+    rev: v0.16.2
     hooks:
       - id: ruff
         # Run the linter with unsafe fixes.
