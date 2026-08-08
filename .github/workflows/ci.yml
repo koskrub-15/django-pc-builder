@@ -69,6 +69,16 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v7
 
+      - name: Install uv
+        uses: astral-sh/setup-uv@v9.0.0
+
+      # The justfile formatting hook shells out to the "just" binary, which the
+      # runner does not ship.
+      - name: Install just
+        run: |
+          uv tool install rust-just
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
       # pre-commit-update rewrites .pre-commit-config.yaml whenever a hook has a
       # newer release, which would fail CI on unrelated PRs — dependabot owns
       # those bumps instead. no-commit-to-branch is a local-only guard.
@@ -87,8 +97,11 @@ jobs:
       - name: Install uv
         uses: astral-sh/setup-uv@v9.0.0
 
+      # --no-hashes: pip-audit resolves in its own venv on the runner's default
+      # Python, so it picks wheels for a different tag than the lock was
+      # resolved for and every hash mismatches. Versions are what it audits.
       - name: Audit dependencies
-        run: uv export --frozen --no-emit-project | uvx pip-audit -r /dev/stdin
+        run: uv export --frozen --no-emit-project --no-hashes | uvx pip-audit -r /dev/stdin
 
   docker:
     name: Docker stack smoke test

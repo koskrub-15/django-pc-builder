@@ -12,6 +12,15 @@ from core.settings import *  # noqa: F403
 
 EMAIL_BACKEND = "django.core.mail.backends.locmem.EmailBackend"
 
+# core.settings turns the production hardening on whenever DEBUG is false, and
+# DEBUG comes from the environment. Without this the whole suite depends on
+# whether a .env happens to exist: with one it passes, and on a bare checkout
+# SECURE_SSL_REDIRECT answers every test request with a 301.
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SECURE_HSTS_SECONDS = 0
+
 CHANNEL_LAYERS = {
     "default": {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
