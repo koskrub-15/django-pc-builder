@@ -143,5 +143,5 @@ exclude_also = [
 
 [dependency-groups]
 dev = [
-    "coverage[toml]>=7.15.3",
+    "coverage[toml]>=7.15.4",
 ]
