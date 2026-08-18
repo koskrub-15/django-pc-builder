@@ -55,12 +55,17 @@ jobs:
           EMAIL_HOST_PASSWORD: ci
         run: uv run python manage.py check --deploy --fail-level WARNING
 
+      # fail_ci_if_error is off by default, which lets a rejected upload (an
+      # expired or missing CODECOV_TOKEN) pass as a green step and silently stop
+      # reporting. Only enforced on push: forks cannot read the secret at all,
+      # and dependabot PRs read it from the Dependabot store, not this one.
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.13'
         uses: codecov/codecov-action@v7
         with:
           files: coverage.xml
           token: ${{ secrets.CODECOV_TOKEN }}
+          fail_ci_if_error: ${{ github.event_name == 'push' }}
 
   lint:
     name: Lint & type-check
