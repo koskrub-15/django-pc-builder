@@ -1,5 +1,5 @@
 # [stage__base]-[BEGIN]================================================
-FROM python:3.14.7-slim AS base
+FROM python:3.15.0rc2-slim AS base
 
 ENV PYTHONUNBUFFERED=1
 
